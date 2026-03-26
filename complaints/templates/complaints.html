@@ -1,0 +1,276 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Solicita Cidade - Feed de Solicitações{% endblock %}
+
+{% block content %}
+<style>
+    /* 1. SEÇÃO DE BUSCA */
+    .search-section {
+        display: flex;
+        justify-content: center;
+        padding: 2rem 1rem;
+        background-color: transparent;
+    }
+
+    .search-form {
+        display: flex;
+        width: 100%;
+        max-width: 650px;
+        gap: 12px;
+        align-items: center;
+    }
+
+    .search-form input[type="text"] {
+        flex: 1;
+        padding: 14px 20px;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        font-size: 1rem;
+        outline: none;
+        transition: all 0.3s ease;
+    }
+
+    .btn-search {
+        background-color: #2798c5;
+        color: white;
+        border: none;
+        padding: 14px 30px;
+        border-radius: 8px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background 0.3s;
+    }
+
+    /* 2. FEED DE SOLICITAÇÕES */
+    .complaints-feed {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 30px;
+        margin-bottom: 20px;
+    }
+
+    .feed-card {
+        background: #fff;
+        width: 100%;
+        max-width: 550px;
+        border-radius: 12px;
+        border: 1px solid #e1e1e1;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+        transition: transform 0.2s;
+    }
+
+    .card-header {
+        display: flex;
+        align-items: center;
+        padding: 15px;
+        gap: 12px;
+    }
+
+    .user-avatar {
+        width: 45px;
+        height: 45px;
+        background-color: #f0f0f0;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+    }
+
+    .image-wrapper {
+        position: relative;
+        width: 100%;
+        height: 350px;
+        background-color: #f9f9f9;
+    }
+
+    .image-wrapper img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .category-strip {
+        background-color: #2798c5;
+        color: white;
+        text-align: center;
+        padding: 10px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+    }
+
+    .card-body {
+        padding: 20px;
+    }
+
+    .card-body h3 {
+        margin-bottom: 8px;
+        font-size: 1.1rem;
+    }
+
+    .card-footer-link {
+        display: block;
+        text-align: center;
+        padding: 15px;
+        border-top: 1px solid #f0f0f0;
+        color: #777;
+        text-decoration: none;
+    }
+
+    /* AÇÕES DO DONO */
+    .owner-actions {
+        display: flex;
+        gap: 10px;
+        padding: 0 20px 15px 20px;
+        justify-content: flex-end;
+    }
+
+    .btn-action {
+        padding: 6px 12px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: white;
+    }
+
+    .btn-edit {
+        background-color: #f39c12;
+    }
+
+    .btn-delete {
+        background-color: #e74c3c;
+    }
+
+    /* SENTINELA DO SCROLL INFINITO */
+    #loading-sentinel {
+        text-align: center;
+        padding: 20px;
+        color: #888;
+        min-height: 50px;
+    }
+</style>
+
+<!-- Seção de Busca -->
+<section class="search-section">
+    <form method="GET" action="{% url 'complaints_list' %}" class="search-form">
+        <input type="text" name="search" placeholder="Ex: Iluminação, Lixo..." value="{{ request.GET.search }}">
+        <button type="submit" class="btn-search">Buscar</button>
+    </form>
+</section>
+
+<!-- Container do Feed -->
+<div class="complaints-feed" id="feed-container">
+    {% if complaints %}
+    {% for complaint in complaints %}
+    <article class="feed-card">
+        <div class="card-header"
+            style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div class="user-avatar">👤</div>
+                <div class="user-meta">
+                    <h4>{{ complaint.user.get_full_name|default:complaint.user.username }}</h4>
+                    <p>{{ complaint.get_sector_display|default:"Setor não informado" }}</p>
+                </div>
+            </div>
+
+            <!-- Lógica do tempo atrás -->
+            <span style="font-size: 0.8rem; color: #888; white-space: nowrap; margin-top: 5px;">
+                há {{ complaint.created_at|timesince }}
+            </span>
+        </div>
+
+        <div class="image-wrapper">
+            {% if complaint.photo %}
+            <img src="{{ complaint.photo.url }}" alt="{{ complaint.title }}" loading="lazy">
+            {% else %}
+            <div style="display:flex; height:100%; align-items:center; justify-content:center; color:#ccc;">Sem foto
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="category-strip">{{ complaint.category }}</div>
+
+        <div class="card-body">
+            <h3>{{ complaint.title }}</h3>
+            <p>{{ complaint.description|truncatewords:20 }}</p>
+        </div>
+
+        <!-- {# Botões apenas para o dono #}
+                {% if user.is_authenticated and complaint.user == user %}
+                    <div class="owner-actions">
+                        <a href="{% url 'complaints_update' complaint.pk %}" class="btn-action btn-edit">Editar</a>
+                        <a href="{% url 'complaints_delete' complaint.pk %}" class="btn-action btn-delete">Excluir</a>
+                    </div>
+                {% endif %} -->
+
+        <a href="{% url 'complaints_detail' complaint.pk %}" class="card-footer-link">Ver detalhes</a>
+    </article>
+    {% endfor %}
+    {% else %}
+    <div style="text-align: center; padding: 50px; color: #777;">
+        <h3>Nenhuma solicitação encontrada.</h3>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Auxiliar para o Scroll Infinito -->
+<div id="loading-sentinel">
+    {% if page_obj.has_next %}
+    <a id="next-page-link"
+        href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}"
+        style="display: none;">Próxima</a>
+    <p id="loader-status">Carregando mais solicitações...</p>
+    {% endif %}
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        let nextPageLink = document.querySelector('#next-page-link');
+        const container = document.querySelector('#feed-container');
+        const sentinel = document.querySelector('#loading-sentinel');
+        const statusText = document.querySelector('#loader-status');
+
+        if (!nextPageLink) return;
+
+        const observer = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting && nextPageLink) {
+                loadMore();
+            }
+        }, { rootMargin: '200px' });
+
+        observer.observe(sentinel);
+
+        async function loadMore() {
+            const url = nextPageLink.getAttribute('href');
+            nextPageLink = null; // Trava para não disparar várias vezes
+
+            try {
+                const response = await fetch(url);
+                const text = await response.text();
+                const parser = new DOMParser();
+                const html = parser.parseFromString(text, 'text/html');
+
+                const newCards = html.querySelectorAll('.feed-card');
+                const newNextLink = html.querySelector('#next-page-link');
+
+                newCards.forEach(card => container.appendChild(card));
+
+                if (newNextLink) {
+                    nextPageLink = newNextLink;
+                } else {
+                    statusText.innerText = "Você chegou ao fim das solicitações.";
+                    observer.unobserve(sentinel);
+                }
+            } catch (e) {
+                console.error("Erro ao carregar mais cards", e);
+            }
+        }
+    });
+</script>
+
+{% endblock %}

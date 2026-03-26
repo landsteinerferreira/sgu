@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    /* 1. Container de Centralização */
+    .form-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start; /* Alinha no topo para formulários longos */
+        min-height: calc(100vh - 200px);
+        padding: 2rem 1rem;
+    }
+
+    /* 2. Card Personalizado */
+    .form-card {
+        background: var(--white);
+        width: 100%;
+        max-width: 600px;
+        padding: 2.5rem;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        border: 1px solid #eee;
+    }
+
+    .form-card h2 {
+        text-align: center;
+        color: var(--primary-color);
+        margin-bottom: 2rem;
+        font-weight: 700;
+        font-size: 1.6rem;
+    }
+
+    /* 3. Transformando a Tabela do Django em Layout Vertical */
+    .form-card table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .form-card tr {
+        display: flex;
+        flex-direction: column; /* Label em cima do Input */
+        margin-bottom: 1.5rem;
+    }
+
+    .form-card th {
+        text-align: left;
+        padding-bottom: 8px;
+        font-size: 0.95rem;
+        color: var(--text-dark);
+    }
+
+    /* Estilização de Inputs, Textareas e Selects */
+    .form-card td input, 
+    .form-card td select, 
+    .form-card td textarea {
+        width: 100%;
+        padding: 12px 15px;
+        border: 1.5px solid #ddd;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-family: inherit;
+        transition: all 0.3s ease;
+    }
+
+    /* Destaque para o campo de Upload de Arquivo */
+    .form-card td input[type="file"] {
+        padding: 8px;
+        border: 1px dashed var(--primary-color);
+        background: rgba(0, 150, 199, 0.02);
+        cursor: pointer;
+    }
+
+    .form-card td input:focus, 
+    .form-card td select:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 4px rgba(0, 150, 199, 0.1);
+    }
+
+    /* Ajuste para Checkboxes (se houver) */
+    .form-card td input[type="checkbox"] {
+        width: auto;
+        margin-right: 10px;
+    }
+
+    /* Erros do Formulário */
+    .errorlist {
+        color: #ef4444;
+        list-style: none;
+        font-size: 0.85rem;
+        padding: 0;
+        margin-bottom: 5px;
+        font-weight: 600;
+    }
+
+    /* 4. Botão de Submissão */
+    .btn-block {
+        width: 100%;
+        background-color: var(--primary-color);
+        color: white;
+        padding: 15px;
+        border: none;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background 0.3s, transform 0.2s;
+        margin-top: 1rem;
+    }
+
+    .btn-block:hover {
+        background-color: var(--primary-hover);
+        transform: translateY(-2px);
+    }
+
+    /* Responsividade extra */
+    @media (max-width: 480px) {
+        .form-card {
+            padding: 1.5rem;
+        }
+    }
+</style>
+
+<div class="form-wrapper">
+    <div class="form-card">
+        <h2>Regitrar Dados</h2>
+        
+        <form action="" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <table>
+                {{ form.as_table }}
+            </table>
+
+            <button type="submit" class="btn-block">Confirmar Cadastro</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

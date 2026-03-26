@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    /* 1. Container de Centralização */
+    .login-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: calc(100vh - 250px); /* Ajuste baseado no seu header/footer */
+        padding: 20px;
+    }
+
+    /* 2. Div Personalizada (Card) */
+    .login-card {
+        background: #ffffff;
+        width: 100%;
+        max-width: 400px;
+        padding: 2.5rem;
+        border-radius: 12px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+        border: 1px solid #efefef;
+    }
+
+    .login-card h2 {
+        text-align: center;
+        color: #0096c7;
+        margin-bottom: 2rem;
+        font-size: 1.5rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    /* 3. Estilização da Tabela do Django (as_table) */
+    .login-card table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    /* Força cada linha da tabela a se comportar como um bloco (Responsividade) */
+    .login-card tr {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 15px;
+    }
+
+    .login-card th {
+        text-align: left;
+        font-size: 0.9rem;
+        margin-bottom: 5px;
+        color: #555;
+    }
+
+    /* Estiliza os inputs que o Django coloca dentro do td */
+    .login-card td input {
+        width: 100%;
+        padding: 12px;
+        border: 1.5px solid #ddd;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    .login-card td input:focus {
+        outline: none;
+        border-color: #0096c7;
+        box-shadow: 0 0 0 3px rgba(0, 150, 199, 0.1);
+    }
+
+    /* Remove os erros padrão da lista para ficarem limpos */
+    .errorlist {
+        color: #e63946;
+        list-style: none;
+        padding: 0;
+        font-size: 0.8rem;
+        margin-bottom: 5px;
+    }
+
+    /* 4. Botão de Entrada */
+    .btn-login {
+        width: 100%;
+        background-color: #0096c7;
+        color: white;
+        padding: 12px;
+        border: none;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.3s ease;
+        margin-top: 10px;
+    }
+
+    .btn-login:hover {
+        background-color: #0077b6;
+    }
+</style>
+
+<div class="login-wrapper">
+    <div class="login-card">
+        <h2>Sistema de Login</h2>
+        
+        <form method="post">
+            {% csrf_token %}
+
+            <table>
+                {{ login_form.as_table }}
+            </table>
+
+            <input type="submit" value="Entrar" class="btn-login">
+        </form>
+    </div>
+</div>
+{% endblock %}

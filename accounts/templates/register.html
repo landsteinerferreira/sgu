@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    /* 1. Container de Centralização */
+    .auth-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: calc(100vh - 200px);
+        padding: 20px;
+    }
+
+    /* 2. Div Personalizada (Card) */
+    .auth-card {
+        background: #ffffff;
+        width: 100%;
+        max-width: 450px;
+        padding: 2rem;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        border: 1px solid #eee;
+    }
+
+    .auth-card h2 {
+        text-align: center;
+        color: #0096c7;
+        margin-bottom: 1.5rem;
+        font-weight: 700;
+    }
+
+    /* 3. Estilização dos Grupos e Inputs */
+    .form-group {
+        margin-bottom: 1.25rem;
+    }
+
+    .form-group label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+        color: #444;
+    }
+
+    .form-group input {
+        width: 100%;
+        padding: 12px 15px;
+        border: 1.5px solid #e1e1e1;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-group input:focus {
+        outline: none;
+        border-color: #0096c7;
+        box-shadow: 0 0 0 4px rgba(0, 150, 199, 0.1);
+    }
+
+    /* Estilo para as dicas de senha/campos do Django */
+    .help-text {
+        display: block;
+        font-size: 0.75rem;
+        color: #777;
+        margin-top: 5px;
+        line-height: 1.2;
+    }
+
+    /* Erros do Django */
+    .errorlist {
+        color: #d63031;
+        list-style: none;
+        font-size: 0.85rem;
+        margin-bottom: 5px;
+        padding: 0;
+        font-weight: 600;
+    }
+
+    /* Botão de Submissão */
+    .btn-submit {
+        width: 100%;
+        background-color: #0096c7;
+        color: white;
+        padding: 14px;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: transform 0.2s, background 0.3s;
+        margin-top: 10px;
+    }
+
+    .btn-submit:hover {
+        background-color: #0077b6;
+        transform: translateY(-1px);
+    }
+
+    .btn-submit:active {
+        transform: translateY(0);
+    }
+</style>
+
+<div class="auth-wrapper">
+    <div class="auth-card">
+        <h2>Criar Conta</h2>
+        
+        <form method="post">
+            {% csrf_token %}
+
+            <!-- Campo Usuário -->
+            <div class="form-group">
+                {{ user_form.username.errors }}
+                <label for="{{ user_form.username.id_for_label }}">Usuário</label>
+                {{ user_form.username }}
+                {% if user_form.username.help_text %}
+                    <small class="help-text">{{ user_form.username.help_text|safe }}</small>
+                {% endif %}
+            </div>
+
+            <!-- NOVO: Campo Nome Completo -->
+            <div class="form-group">
+                {{ user_form.first_name.errors }}
+                <label for="{{ user_form.first_name.id_for_label }}">Nome Completo</label>
+                {{ user_form.first_name }}
+            </div>
+
+            <!-- NOVO: Campo E-mail -->
+            <div class="form-group">
+                {{ user_form.email.errors }}
+                <label for="{{ user_form.email.id_for_label }}">E-mail</label>
+                {{ user_form.email }}
+            </div>
+
+            <!-- Campo Senha -->
+            <div class="form-group">
+                {{ user_form.password1.errors }}
+                <label for="{{ user_form.password1.id_for_label }}">Senha</label>
+                {{ user_form.password1 }}
+                {% if user_form.password1.help_text %}
+                    <small class="help-text">{{ user_form.password1.help_text|safe }}</small>
+                {% endif %}
+            </div>
+
+            <!-- Campo Confirmação -->
+            <div class="form-group">
+                {{ user_form.password2.errors }}
+                <label for="{{ user_form.password2.id_for_label }}">Confirmação de Senha</label>
+                {{ user_form.password2 }}
+            </div>
+
+            <button type="submit" class="btn-submit">Finalizar Cadastro</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

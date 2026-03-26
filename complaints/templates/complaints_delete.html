@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block title %}Excluir Solicitação - Solicita Cidade{% endblock %}
+
+{% block content %}
+<style>
+    /* 1. Container de Centralização */
+    .delete-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: calc(100vh - 250px);
+        padding: 2rem 1rem;
+    }
+
+    /* 2. Card de Alerta Personalizado */
+    .delete-card {
+        background: var(--white);
+        width: 100%;
+        max-width: 500px;
+        padding: 2.5rem;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        border: 1px solid #eee;
+        text-align: center;
+    }
+
+    /* Ícone de Alerta para reforçar a gravidade */
+    .alert-icon {
+        font-size: 3rem;
+        margin-bottom: 1.5rem;
+        display: block;
+    }
+
+    .delete-card h1 {
+        color: #d9534f; /* Cor de atenção/perigo */
+        font-size: 1.6rem;
+        margin-bottom: 1rem;
+        font-weight: 700;
+    }
+
+    .delete-card p {
+        color: #555;
+        font-size: 1.1rem;
+        line-height: 1.5;
+        margin-bottom: 2rem;
+    }
+
+    .target-name {
+        color: var(--text-dark);
+        background: #fff5f5;
+        padding: 2px 8px;
+        border-radius: 4px;
+        border: 1px solid #fed7d7;
+    }
+
+    /* 3. Botões no Padrão do Feed */
+    .buttons-container {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+    }
+
+    .btn {
+        flex: 1;
+        padding: 12px 25px;
+        font-size: 1rem;
+        font-weight: 700;
+        border-radius: 8px;
+        cursor: pointer;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        border: none;
+        display: inline-block;
+    }
+
+    .btn-danger {
+        background-color: #ef4444;
+        color: white;
+    }
+
+    .btn-danger:hover {
+        background-color: #dc2626;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
+    }
+
+    .btn-secondary {
+        background-color: #f3f4f6;
+        color: #4b5563;
+    }
+
+    .btn-secondary:hover {
+        background-color: #e5e7eb;
+        transform: translateY(-2px);
+    }
+
+    /* Responsividade */
+    @media (max-width: 480px) {
+        .buttons-container {
+            flex-direction: column;
+        }
+        .btn {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="delete-wrapper">
+    <div class="delete-card">
+        <span class="alert-icon">⚠️</span>
+        <h1>Confirmar Exclusão</h1>
+        
+        <p>
+            Você tem certeza que deseja excluir permanentemente a solicitação: <br>
+            <strong class="target-name">"{{ object.title }}"</strong>?
+        </p>
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="buttons-container">
+                <button type="submit" class="btn btn-danger">Sim, Excluir</button>
+                <a href="{% url 'complaints_detail' pk=object.pk %}" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
