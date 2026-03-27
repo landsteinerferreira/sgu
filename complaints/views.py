@@ -119,3 +119,22 @@ def vote_suggestion(request, pk):
     else:
         suggestion.votes.add(request.user)
     return redirect('suggestions')
+
+
+class HomeView(TemplateView):
+    template_name = 'home.html'
+
+    def get_context_data(self, **kwargs):
+        # Chama a implementação base primeiro para pegar o contexto padrão
+        context = super().get_context_data(**kwargs)
+        
+        # Adiciona dados dinâmicos para a Landing Page
+        context['total_complaints'] = Complaints.objects.count()
+        context['resolved_complaints'] = Complaints.objects.filter(status='resolvido').count()
+        
+        # Opcional: Pegar os 3 bairros mais ativos para mostrar na Home
+        context['top_sectors'] = Complaints.objects.values('sector').annotate(
+            total=Count('id')
+        ).order_by('-total')[:3]
+        
+        return context
