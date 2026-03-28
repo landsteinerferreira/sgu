@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .error-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 70vh;
+    }
+    .error-container {
+        text-align: center;
+        background: white;
+        padding: 40px;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        border: 1px solid #eee;
+    }
+</style>
+
+<div class="container error-wrapper">
+    <div class="error-container">
+        <h1 style="font-size: 3rem; margin-bottom: 1rem;">🚫</h1>
+        <h2 style="color: #ef4444; margin-bottom: 1rem; font-weight: bold;">Acesso Negado</h2>
+        <p style="color: #666; margin-bottom: 2rem;">
+            Você não tem permissão para editar esta solicitação porque ela pertence a outro usuário.
+        </p>
+        <a href="{% url 'complaints_list' %}" class="btn btn-primary" style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
+            Voltar para o Feed
+        </a>
+    </div>
+</div>
+{% endblock %}

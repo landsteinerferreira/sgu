@@ -4,7 +4,7 @@ from complaints.forms import ComplaintsModelForm
 from django.views.generic import TemplateView  # Adicionado
 from django.views.generic import ListView, CreateView, UpdateView, DetailView, DeleteView
 from django.urls import reverse_lazy
-from django.contrib.auth.mixins import LoginRequiredMixin  # Adicionado
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin  # Adicionado
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.shortcuts import redirect, get_object_or_404
@@ -56,6 +56,14 @@ class ComplaintsUpdateView(UpdateView):
     model = Complaints  # Modelo
     form_class = ComplaintsModelForm
     template_name = 'complaints_update.html'
+
+    # página 403 personalizada
+    raise_exception = True 
+
+    # Teste de segurança
+    def test_func(self):
+        complaint = self.get_object()
+        return self.request.user == complaint.user  # Retorna True se for o dono
 
     def get_success_url(self):
         return reverse_lazy('complaints_detail', kwargs={'pk': self.object.pk})

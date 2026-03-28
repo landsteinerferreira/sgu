@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .error-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 70vh;
+        text-align: center;
+    }
+    .error-container {
+        background: white;
+        padding: 50px;
+        border-radius: 15px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        max-width: 500px;
+        border: 1px solid #eee;
+    }
+</style>
+
+<div class="container error-wrapper">
+    <div class="error-container">
+        <h1 style="font-size: 4rem; margin-bottom: 1rem;">🔍</h1>
+        <h2 style="color: #6c757d; margin-bottom: 1rem; font-weight: 800;">Página Não Encontrada</h2>
+        <p style="color: #666; margin-bottom: 2rem; font-size: 1.1rem;">
+            A solicitação que você procura não existe ou foi removida durante a manutenção do sistema.
+        </p>
+        <a href="{% url 'complaints_list' %}" class="btn" style="background-color: #007bff; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: 600;">
+            Voltar para o Feed Geral
+        </a>
+    </div>
+</div>
+{% endblock %}
