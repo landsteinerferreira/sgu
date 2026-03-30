@@ -126,19 +126,23 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 
 JAZZMIN_SETTINGS = {
     # Título da aba do navegador
-    "site_title": "Gestão Solicita Cidadão",
+    "site_title": "Solicita Cidadão Admin",
     
     # Título no painel (aquele que aparece no login)
     "site_header": "Solicita Cidadão",
 
-    # # Caminho relativo dentro da pasta static
-    # "site_logo": "images/logo_solicita_cidadao.jpg",
+    "site_brand": "",
 
-    # # Logo específica para a tela de login
-    # "login_logo": "images/logo_solicita_cidadao.jpg", 
-    
-    # Logo da marca (deve estar na pasta static)
-    # "site_logo": "img/logo_small.png", 
+    # Logo no topo do menu lateral (após logar) - tamanho menor
+    "site_logo": "images/logo_solicita_cidadao.png",
+
+    "site_logo_classes": "img-fluid",
+
+    # Classe CSS para a logo (ajuda no dimensionamento)
+    "site_logo_classes": "img-fluid",
+
+    # Se você quer que a logo apareça em tamanho maior no topo:
+    "site_logo_style": "max-height: 50px;", # Ajuste a altura conforme necessário
     
     # Boas-vindas na tela de login
     "welcome_sign": "Bem-vindo ao Painel de Gestão de Trindade",
