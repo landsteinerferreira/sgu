@@ -130,9 +130,15 @@ JAZZMIN_SETTINGS = {
     
     # Título no painel (aquele que aparece no login)
     "site_header": "Solicita Cidadão",
+
+    # # Caminho relativo dentro da pasta static
+    # "site_logo": "images/logo_solicita_cidadao.jpg",
+
+    # # Logo específica para a tela de login
+    # "login_logo": "images/logo_solicita_cidadao.jpg", 
     
     # Logo da marca (deve estar na pasta static)
-    "site_logo": "img/logo_small.png", 
+    # "site_logo": "img/logo_small.png", 
     
     # Boas-vindas na tela de login
     "welcome_sign": "Bem-vindo ao Painel de Gestão de Trindade",
