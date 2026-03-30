@@ -1,9 +1,11 @@
+from django.db.models import Q
 from django.db.models import Count  # Adicionado
 from .models import Complaints, Suggestion  # Adicionado
 from complaints.forms import ComplaintsModelForm
 from django.views.generic import TemplateView, ListView, UpdateView  # Adicionado
 from django.views.generic import ListView, CreateView, UpdateView, DetailView, DeleteView
 from django.urls import reverse_lazy
+from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin  # Adicionado
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
@@ -15,23 +17,44 @@ class ComplaintsListView(ListView):
     model = Complaints
     template_name = 'complaints.html'
     context_object_name = 'complaints'
-    paginate_by = 6
+    paginate_by = 10
 
     def get_queryset(self):
-        complaints = super().get_queryset().order_by('-id')
+        # Filtro base
+        queryset = Complaints.objects.filter(
+            status__in=['OPEN', 'IN_PROGRESS']
+        ).order_by('-created_at')
 
-        search = self.request.GET.get('search')
-        if search:
-            complaints = complaints.filter(title__icontains=search)
-        return complaints
+        # Lógica de busca
+        search_query = self.request.GET.get('search')
+        if search_query:
+            queryset = queryset.filter(
+                Q(title__icontains=search_query) | 
+                Q(description__icontains=search_query)
+            )
+        return queryset
 
 
 # Minhas Solicitações
 @method_decorator(login_required(login_url='login'), name='dispatch')
 class MyComplaintsListView(ComplaintsListView):
+    # Opcional: Se quiser um template diferente para as "Minhas"
+    # template_name = 'my_complaints.html' 
+
     def get_queryset(self):
-        # Reutiliza a lógica de busca, mas filtra apenas pelo usuário logado
-        return super().get_queryset().filter(user=self.request.user)
+        # 1. Começamos do zero (todos os registros do usuário logado)
+        # Diferente da classe pai, aqui NÃO filtramos por status fixo
+        queryset = Complaints.objects.filter(user=self.request.user).order_by('-created_at')
+
+        # 2. Reutilizamos a lógica de busca por texto (Barra de Pesquisa)
+        search_query = self.request.GET.get('search')
+        if search_query:
+            queryset = queryset.filter(
+                Q(title__icontains=search_query) | 
+                Q(description__icontains=search_query)
+            )
+        
+        return queryset
 
 
 class ComplaintsDetailView(DetailView):
@@ -67,6 +90,14 @@ class ComplaintsUpdateView(UpdateView):
 
     def get_success_url(self):
         return reverse_lazy('complaints_detail', kwargs={'pk': self.object.pk})
+    
+    def dispatch(self, request, *args, **kwargs):
+        obj = self.get_object()
+        # Se tentar editar algo que não está aberto ou em progresso, bloqueia
+        if obj.status not in ['OPEN', 'IN_PROGRESS']:
+            messages.error(request, "Solicitações finalizadas não podem ser editadas.")
+            return redirect('complaints_detail', pk=obj.pk)
+        return super().dispatch(request, *args, **kwargs)
 
 
 @method_decorator(login_required(login_url='login'), name='dispatch')

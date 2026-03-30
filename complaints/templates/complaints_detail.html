@@ -2,142 +2,81 @@
 
 {% block content %}
 <style>
-    /* Container Principal */
-    .detail-wrapper {
-        max-width: 700px;
-        margin: 2rem auto;
-        padding: 0 1rem;
-    }
+    /* ... Seus estilos anteriores se mantêm ... */
+    .detail-wrapper { max-width: 700px; margin: 2rem auto; padding: 0 1rem; }
+    .complaints-card { background-color: var(--white); box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05); border-radius: 15px; overflow: hidden; border: 1px solid #eee; }
+    .image-header { width: 100%; height: 350px; background-color: #f0f0f0; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; }
+    .image-header img { width: 100%; height: 100%; object-fit: cover; }
+    .category-badge { position: absolute; top: 20px; left: 20px; background-color: var(--primary-color); color: white; padding: 5px 15px; border-radius: 50px; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; z-index: 10; }
 
-    /* Card de Detalhes */
-    .complaints-card {
-        background-color: var(--white);
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
-        border-radius: 15px;
-        overflow: hidden;
-        border: 1px solid #eee;
-        transition: transform 0.3s ease;
-    }
-
-    /* Estilização da Imagem */
-    .image-header {
-        width: 100%;
-        height: 350px;
-        background-color: #f0f0f0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        overflow: hidden;
-        position: relative;
-    }
-
-    .image-header img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-
-    /* Badge de Categoria sobre a imagem */
-    .category-badge {
+    /* --- NOVOS ESTILOS PARA STATUS --- */
+    .status-floating {
         position: absolute;
         top: 20px;
-        left: 20px;
-        background-color: var(--primary-color);
-        color: white;
-        padding: 5px 15px;
+        right: 20px;
+        padding: 6px 16px;
         border-radius: 50px;
-        font-size: 0.85rem;
-        font-weight: 700;
+        font-weight: 800;
+        font-size: 0.8rem;
         text-transform: uppercase;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        letter-spacing: 1px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        z-index: 10;
     }
 
-    /* Conteúdo do Card */
-    .card-body {
-        padding: 2rem;
-    }
+    /* Cores Dinâmicas do Status */
+    .status-open { background-color: #f1c40f; color: #000; }        /* Amarelo */
+    .status-progress { background-color: #3498db; color: #fff; }    /* Azul */
+    .status-resolved { background-color: #2ecc71; color: #fff; }    /* Verde */
+    .status-canceled { background-color: #e74c3c; color: #fff; }    /* Vermelho */
 
-    .card-body h2 {
-        color: var(--text-dark);
-        font-size: 1.8rem;
-        margin-bottom: 1.5rem;
-        border-bottom: 2px solid var(--gray-light);
-        padding-bottom: 0.5rem;
-    }
+    .card-body { padding: 2rem; }
+    .card-body h2 { color: var(--text-dark); font-size: 1.8rem; margin-bottom: 1.5rem; border-bottom: 2px solid var(--gray-light); padding-bottom: 0.5rem; }
+    
+    .info-row { margin-bottom: 1rem; display: flex; align-items: flex-start; gap: 10px; }
+    .info-row strong { color: var(--primary-color); min-width: 100px; }
 
-    .info-row {
-        margin-bottom: 1rem;
-        display: flex;
-        align-items: flex-start;
-        gap: 10px;
-    }
-
-    .info-row strong {
-        color: var(--primary-color);
-        min-width: 80px;
-    }
-
-    .description-box {
-        background-color: #f9f9f9;
+    /* Caixa de Feedback da Prefeitura */
+    .feedback-box {
+        background-color: #eef9ff;
         padding: 1.5rem;
-        border-radius: 8px;
+        border-radius: 12px;
         margin-top: 1.5rem;
-        border-left: 4px solid var(--primary-color);
+        border: 1px dashed #0096c7;
     }
-
-    /* Botões de Ação */
-    .actions-container {
+    .feedback-title {
         display: flex;
-        justify-content: center;
-        gap: 15px;
-        margin-top: 2rem;
+        align-items: center;
+        gap: 8px;
+        color: #0077b6;
+        font-weight: 700;
+        margin-bottom: 8px;
     }
 
-    .btn {
-        padding: 12px 25px;
-        border-radius: 8px;
-        font-weight: 600;
-        text-decoration: none;
-        transition: all 0.3s;
-        text-align: center;
-        flex: 1;
-        max-width: 200px;
-    }
+    .description-box { background-color: #f9f9f9; padding: 1.5rem; border-radius: 8px; margin-top: 1.5rem; border-left: 4px solid var(--primary-color); }
 
-    .btn-edit {
-        background-color: var(--primary-color);
-        color: white;
-    }
-
-    .btn-edit:hover {
-        background-color: var(--primary-hover);
-        transform: translateY(-2px);
-    }
-
-    .btn-delete {
-        background-color: #ef4444;
-        color: white;
-    }
-
-    .btn-delete:hover {
-        background-color: #dc2626;
-        transform: translateY(-2px);
-    }
-
-    /* Responsividade */
-    @media (max-width: 480px) {
-        .image-header { height: 250px; }
-        .actions-container { flex-direction: column; align-items: center; }
-        .btn { max-width: 100%; width: 100%; }
-    }
+    .actions-container { display: flex; justify-content: center; gap: 15px; margin-top: 2rem; }
+    .btn { padding: 12px 25px; border-radius: 8px; font-weight: 600; text-decoration: none; transition: all 0.3s; text-align: center; flex: 1; max-width: 200px; }
+    .btn-edit { background-color: var(--primary-color); color: white; }
+    .btn-delete { background-color: #ef4444; color: white; }
 </style>
 
 <div class="detail-wrapper">
     <div class="complaints-card">
         <div class="image-header">
+            <!-- Badge de Categoria -->
             {% if object.category %}
                 <span class="category-badge">{{ object.category }}</span>
             {% endif %}
+
+            <!-- Badge Dinâmico de Status -->
+            <span class="status-floating 
+                {% if object.status == 'OPEN' %}status-open
+                {% elif object.status == 'IN_PROGRESS' %}status-progress
+                {% elif object.status == 'RESOLVED' %}status-resolved
+                {% else %}status-canceled{% endif %}">
+                ● {{ object.get_status_display }}
+            </span>
 
             {% if object.photo %}
                 <img src="{{ object.photo.url }}" alt="{{ object.title }}">
@@ -150,31 +89,56 @@
             <h2>{{ object.title }}</h2>
             
             <div class="info-row">
-                <strong>📍 Local:</strong>
+                <strong>📍 Localização:</strong>
                 <span>{{ object.address }} — {{ object.get_sector_display }}</span>
+            </div>
+
+            <div class="info-row">
+                <strong>📅 Criado em:</strong>
+                <span>{{ object.created_at|date:"d/m/Y às H:i" }}</span>
+            </div>
+
+            <div class="info-row">
+                <strong>⚠️ Prioridade:</strong>
+                <span>{{ object.get_priority_display }}</span>
             </div>
 
             {% if object.description %}
                 <div class="description-box">
-                    <strong>Descrição do Problema:</strong>
-                    <p style="margin-top: 10px; color: #555;">{{ object.description }}</p>
+                    <strong>Descrição do Cidadão:</strong>
+                    <p style="margin-top: 10px; color: #555; line-height: 1.6;">{{ object.description }}</p>
+                </div>
+            {% endif %}
+
+            <!-- SEÇÃO DE RESPOSTA DA PREFEITURA -->
+            {% if object.feedback_agency %}
+                <div class="feedback-box">
+                    <div class="feedback-title">
+                        🏛️ <span>Resposta da Prefeitura:</span>
+                    </div>
+                    <p style="color: #333; margin: 0; line-height: 1.5;">{{ object.feedback_agency }}</p>
                 </div>
             {% endif %}
         </div>
     </div>
     
     {% if user.is_authenticated and object.user == user %}
-        <div class="actions-container">
-            <a href="{% url 'complaints_update' pk=object.pk %}" class="btn btn-edit">Editar Registro</a>
-            <a href="{% url 'complaints_delete' pk=object.pk %}" class="btn btn-delete">Excluir Solicitação</a>
-        </div>
-    {% endif %}
-
-    <!-- {% if user.is_authenticated %}
-        <div class="actions-container">
-            <a href="{% url 'complaints_update' pk=object.pk %}" class="btn btn-edit">Editar Registro</a>
-            <a href="{% url 'complaints_delete' pk=object.pk %}" class="btn btn-delete">Excluir Solicitação</a>
-        </div>
-    {% endif %} -->
+    <div class="actions-container">
+        {# Só permite editar/excluir se o status for ABERTO ou EM ANDAMENTO #}
+        {% if object.status == 'OPEN' %}
+            <a href="{% url 'complaints_update' pk=object.pk %}" class="btn btn-edit">
+                <i class="fas fa-edit"></i> Editar Registro
+            </a>
+            <a href="{% url 'complaints_delete' pk=object.pk %}" class="btn btn-delete">
+                <i class="fas fa-trash"></i> Excluir Solicitação
+            </a>
+        {% else %}
+            {# Caso esteja Resolvido ou Cancelado, mostramos um aviso informativo #}
+            <div style="width: 100%; text-align: center; padding: 15px; background: #f8f9fa; border-radius: 8px; color: #666; border: 1px solid #ddd;">
+                <i class="fas fa-lock"></i> Esta solicitação foi <strong>{{ object.get_status_display }}</strong> e não pode mais ser alterada.
+            </div>
+        {% endif %}
+    </div>
+{% endif %}
 </div>
 {% endblock %}

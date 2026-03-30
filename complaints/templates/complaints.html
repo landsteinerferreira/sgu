@@ -119,34 +119,29 @@
         border-top: 1px solid #f0f0f0;
         color: #777;
         text-decoration: none;
-    }
-
-    /* AÇÕES DO DONO */
-    .owner-actions {
-        display: flex;
-        gap: 10px;
-        padding: 0 20px 15px 20px;
-        justify-content: flex-end;
-    }
-
-    .btn-action {
-        padding: 6px 12px;
-        border-radius: 6px;
-        text-decoration: none;
-        font-size: 0.85rem;
         font-weight: 600;
-        color: white;
     }
 
-    .btn-edit {
-        background-color: #f39c12;
+    .card-footer-link:hover {
+        background-color: #f9f9f9;
+        color: #2798c5;
     }
 
-    .btn-delete {
-        background-color: #e74c3c;
+    /* 3. BADGES DE STATUS */
+    .status-badge-feed {
+        font-size: 0.65rem;
+        padding: 4px 10px;
+        border-radius: 50px;
+        font-weight: 800;
+        text-transform: uppercase;
+        white-space: nowrap;
     }
 
-    /* SENTINELA DO SCROLL INFINITO */
+    .status-open-feed { background: #f1c40f; color: #000; }
+    .status-progress-feed { background: #3498db; color: #fff; }
+    .status-resolved-feed { background: #2ecc71; color: #fff; } 
+    .status-canceled-feed { background: #e74c3c; color: #fff; }
+
     #loading-sentinel {
         text-align: center;
         padding: 20px;
@@ -166,65 +161,67 @@
 <!-- Container do Feed -->
 <div class="complaints-feed" id="feed-container">
     {% if complaints %}
-    {% for complaint in complaints %}
-    <article class="feed-card">
-        <div class="card-header"
-            style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
-            <div style="display: flex; align-items: center; gap: 12px;">
-                <div class="user-avatar">👤</div>
-                <div class="user-meta">
-                    <h4>{{ complaint.user.get_full_name|default:complaint.user.username }}</h4>
-                    <p>{{ complaint.get_sector_display|default:"Setor não informado" }}</p>
+        {% for complaint in complaints %}
+        <article class="feed-card">
+            <!-- Cabeçalho -->
+            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div class="user-avatar">👤</div>
+                    <div class="user-meta">
+                        <h4 style="margin:0; font-size: 1rem;">{{ complaint.user.get_full_name|default:complaint.user.username }}</h4>
+                        <p style="margin:0; font-size: 0.85rem; color: #666;">{{ complaint.get_sector_display|default:"Setor não informado" }}</p>
+                    </div>
+                </div>
+
+                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px;">
+                    <!-- Badge de Status Dinâmico -->
+                    <span class="status-badge-feed 
+                        {% if complaint.status == 'OPEN' %}status-open-feed
+                        {% elif complaint.status == 'IN_PROGRESS' %}status-progress-feed
+                        {% elif complaint.status == 'RESOLVED' %}status-resolved-feed
+                        {% else %}status-canceled-feed{% endif %}">
+                        {{ complaint.get_status_display }}
+                    </span>
+                    <!-- Tempo Atrás -->
+                    <span style="font-size: 0.75rem; color: #888;">há {{ complaint.created_at|timesince }}</span>
                 </div>
             </div>
 
-            <!-- Lógica do tempo atrás -->
-            <span style="font-size: 0.8rem; color: #888; white-space: nowrap; margin-top: 5px;">
-                há {{ complaint.created_at|timesince }}
-            </span>
-        </div>
-
-        <div class="image-wrapper">
-            {% if complaint.photo %}
-            <img src="{{ complaint.photo.url }}" alt="{{ complaint.title }}" loading="lazy">
-            {% else %}
-            <div style="display:flex; height:100%; align-items:center; justify-content:center; color:#ccc;">Sem foto
+            <!-- Imagem -->
+            <div class="image-wrapper">
+                {% if complaint.photo %}
+                    <img src="{{ complaint.photo.url }}" alt="{{ complaint.title }}" loading="lazy">
+                {% else %}
+                    <div style="display:flex; height:100%; align-items:center; justify-content:center; color:#ccc; background:#eee;">📸 Sem foto</div>
+                {% endif %}
             </div>
-            {% endif %}
-        </div>
 
-        <div class="category-strip">{{ complaint.category }}</div>
+            <div class="category-strip">{{ complaint.category }}</div>
 
-        <div class="card-body">
-            <h3>{{ complaint.title }}</h3>
-            <p>{{ complaint.description|truncatewords:20 }}</p>
-        </div>
+            <!-- Corpo -->
+            <div class="card-body">
+                <h3 style="margin:0 0 10px 0;">{{ complaint.title }}</h3>
+                <p style="margin:0; color: #444; line-height: 1.5;">{{ complaint.description|truncatewords:20 }}</p>
+            </div>
 
-        <!-- {# Botões apenas para o dono #}
-                {% if user.is_authenticated and complaint.user == user %}
-                    <div class="owner-actions">
-                        <a href="{% url 'complaints_update' complaint.pk %}" class="btn-action btn-edit">Editar</a>
-                        <a href="{% url 'complaints_delete' complaint.pk %}" class="btn-action btn-delete">Excluir</a>
-                    </div>
-                {% endif %} -->
-
-        <a href="{% url 'complaints_detail' complaint.pk %}" class="card-footer-link">Ver detalhes</a>
-    </article>
-    {% endfor %}
+            <!-- Link de Detalhes -->
+            <a href="{% url 'complaints_detail' complaint.pk %}" class="card-footer-link">Ver detalhes e Resposta</a>
+        </article>
+        {% endfor %}
     {% else %}
-    <div style="text-align: center; padding: 50px; color: #777;">
-        <h3>Nenhuma solicitação encontrada.</h3>
-    </div>
+        <div style="text-align: center; padding: 50px; color: #777;">
+            <h3>Nenhuma solicitação encontrada.</h3>
+        </div>
     {% endif %}
 </div>
 
 <!-- Auxiliar para o Scroll Infinito -->
 <div id="loading-sentinel">
     {% if page_obj.has_next %}
-    <a id="next-page-link"
-        href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}"
-        style="display: none;">Próxima</a>
-    <p id="loader-status">Carregando mais solicitações...</p>
+        <a id="next-page-link" 
+           href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" 
+           style="display: none;">Próxima</a>
+        <p id="loader-status">Carregando mais solicitações...</p>
     {% endif %}
 </div>
 
@@ -247,7 +244,7 @@
 
         async function loadMore() {
             const url = nextPageLink.getAttribute('href');
-            nextPageLink = null; // Trava para não disparar várias vezes
+            nextPageLink = null; 
 
             try {
                 const response = await fetch(url);
@@ -272,5 +269,4 @@
         }
     });
 </script>
-
 {% endblock %}
