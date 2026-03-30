@@ -147,30 +147,28 @@ class HomeView(TemplateView):
         
         return context
 
+#  Dashboard dentro do Admin do Django
+class AdminDashboardStatsView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+    template_name = 'admin/dashboard_stats.html'
 
-#  Dashboard do Orgão
-class DashboardOrgaoView(LoginRequiredMixin, UserPassesTestMixin, ListView):
-    model = Complaints
-    template_name = 'orgao/dashboard.html'
-    context_object_name = 'complaints'
-    ordering = ['-created_at']
-
-    # Substitui o @staff_member_required
+    # Garante que apenas Staff (equipe) acesse essa view
     def test_func(self):
         return self.request.user.is_staff
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Dados para os Cards
+        context['total_complaints'] = Complaints.objects.count()
+        context['open_complaints'] = Complaints.objects.filter(status='OPEN').count()
+        context['in_progress'] = Complaints.objects.filter(status='IN_PROGRESS').count()
+        context['resolved'] = Complaints.objects.filter(status='RESOLVED').count()
+        
+        # Dados para Gráficos ou Listas (ex: Top 5 bairros com problemas)
+        context['sector_stats'] = Complaints.objects.values('sector').annotate(
+            total=Count('id')
+        ).order_by('-total')[:5]
 
-#  Gerencia Reclamação
-class GerenciarReclamacaoView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
-    model = Complaints
-    template_name = 'orgao/gerenciar.html'
-    fields = ['status', 'feedback_agency'] # Campos que o órgão pode editar
-    success_url = reverse_lazy('dashboard_orgao')
-
-    def test_func(self):
-        return self.request.user.is_staff
-
-    # Caso você queira fazer algo extra ao salvar (como enviar e-mail)
-    def form_valid(self, form):
-        # Aqui o form já validou os campos
-        return super().form_valid(form)
+        # Título da página para o Jazzmin
+        context['title'] = "Painel de Indicadores"
+        return context

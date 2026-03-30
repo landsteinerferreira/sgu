@@ -1,0 +1,24 @@
+/* Cor do fundo da Navbar (Azul do Projeto) */
+.main-header {
+    background-color: #0096c7 !important;
+    border-bottom: 1px solid #0077b6 !important;
+}
+
+/* Força o ícone de perfil e o nome do usuário a ficarem brancos */
+.navbar-nav .nav-link, 
+.navbar-nav .nav-link i,
+.user-panel .info a {
+    color: #ffffff !important;
+}
+
+/* Efeito de hover no menu superior */
+.navbar-nav .nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+/* Ajuste do Dropdown do perfil para não sumir no branco */
+.dropdown-menu-lg .dropdown-header {
+    background-color: #f8f9fa;
+    color: #333;
+}

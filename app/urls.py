@@ -3,12 +3,13 @@ from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
 from accounts.views import register_view, login_view, logout_view
-from complaints.views import ComplaintsListView, ComplaintsDetailView, NewComplaintsCreateView, ComplaintsUpdateView, ComplaintsDeleteView, MyComplaintsListView, DashboardView, SuggestionView, vote_suggestion, HomeView
+from complaints.views import ComplaintsListView, ComplaintsDetailView, NewComplaintsCreateView, ComplaintsUpdateView, ComplaintsDeleteView, MyComplaintsListView, DashboardView, SuggestionView, vote_suggestion, HomeView, AdminDashboardStatsView
 
 
 urlpatterns = [
     path('', HomeView.as_view(), name='home'),
     #path('', ComplaintsListView.as_view(), name='complaints_list'),
+    path('admin/dashboard-stats/', AdminDashboardStatsView.as_view(), name='admin_stats'),
     path('admin/', admin.site.urls),
     path('accounts/register/', register_view, name='register'),
     path('accounts/login/', login_view, name='login'),

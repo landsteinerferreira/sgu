@@ -149,8 +149,8 @@ class Complaints(models.Model):
         return self.title
 
     class Meta:
-        verbose_name = 'Reclamação'
-        verbose_name_plural = 'Reclamações'
+        verbose_name = 'Solicitação'
+        verbose_name_plural = 'Solicitações'
 
 
 class ComplaintsInventory(models.Model):

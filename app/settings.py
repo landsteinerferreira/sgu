@@ -143,6 +143,9 @@ JAZZMIN_SETTINGS = {
     # Menu de busca global no topo
     "search_model": "complaints.Complaints",
 
+    # Injeta um CSS customizado para corrigir o topo e o perfil
+    "custom_css": "css/custom_admin.css",
+
     # --- Configuração do Menu Lateral ---
     "topmenu_links": [
         {"name": "Home", "url": "admin:index", "permissions": ["auth.view_user"]},
@@ -161,6 +164,18 @@ JAZZMIN_SETTINGS = {
     # Mostrar o menu lateral expandido por padrão
     "show_sidebar": True,
     "navigation_expanded": True,
+
+    "custom_links": {
+        "complaints": [{
+            "name": "Ver Estatísticas Reais", 
+            "url": "/admin/dashboard-stats/", 
+            "icon": "fas fa-chart-pie",
+        }],
+    },
+    # Isso permite que você mude a página inicial do admin
+    "changeform_format": "horizontal_tabs",
+
+    
 }
 
 JAZZMIN_UI_TWEAKS = {
