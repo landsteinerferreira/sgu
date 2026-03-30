@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}Painel de Gestão - Solicita Cidadão{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi- speedometer2"></i> Painel de Gestão Operacional</h2>
+        <span class="badge bg-primary fs-6">{{ complaints.count }} Solicitações no total</span>
+    </div>
+
+    <!-- Filtros Rápidos (Opcional para o futuro) -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body bg-light">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <p class="mb-0 text-muted">Abaixo estão todas as demandas enviadas pelos cidadãos. Priorize as marcadas como <strong>Alta</strong> ou <strong>Aberta</strong>.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabela de Trabalho -->
+    <div class="card shadow">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>Data</th>
+                        <th>Bairro</th>
+                        <th>Categoria</th>
+                        <th>Prioridade</th>
+                        <th>Status</th>
+                        <th class="text-center">Ação</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in complaints %}
+                    <tr>
+                        <td><strong>#{{ c.id }}</strong></td>
+                        <td>{{ c.created_at|date:"d/m/y" }}</td>
+                        <td>{{ c.get_sector_display }}</td>
+                        <td><span class="text-truncate" style="max-width: 150px; display: inline-block;">{{ c.category.name }}</span></td>
+                        <td>
+                            {% if c.priority == 'HIGH' %}
+                                <span class="badge bg-danger">Alta</span>
+                            {% elif c.priority == 'MEDIUM' %}
+                                <span class="badge bg-warning text-dark">Média</span>
+                            {% else %}
+                                <span class="badge bg-info text-dark">Baixa</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if c.status == 'OPEN' %}
+                                <span class="badge rounded-pill border border-warning text-warning">● Aberta</span>
+                            {% elif c.status == 'IN_PROGRESS' %}
+                                <span class="badge rounded-pill border border-primary text-primary">● Em andamento</span>
+                            {% elif c.status == 'RESOLVED' %}
+                                <span class="badge rounded-pill border border-success text-success">● Resolvida</span>
+                            {% else %}
+                                <span class="badge rounded-pill border border-secondary text-secondary">● Cancelada</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            <a href="{% url 'gerenciar_reclamacao' c.id %}" class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-pencil-square"></i> Atender
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center py-4 text-muted">Nenhuma solicitação encontrada no sistema.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Estilo para deixar a tabela mais "limpa" */
+    .table th { font-weight: 600; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.5px; }
+    .badge { font-weight: 500; }
+    .rounded-pill { padding-left: 12px; padding-right: 12px; }
+</style>
+{% endblock %}

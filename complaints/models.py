@@ -141,6 +141,7 @@ class Complaints(models.Model):
     sector = models.CharField(max_length=100, choices=SECTOR_CHOICES, default='selecione_bairro', verbose_name='Bairro')
     photo = models.ImageField(upload_to='complaints/', blank=True, null=True, verbose_name='Foto')
     user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Usuário')
+    feedback_agency = models.TextField(blank=True, null=True, verbose_name='Resposta do Órgão')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Data de Criação')
     updated_at = models.DateTimeField(auto_now_add=True, verbose_name='Data de atualização')
 

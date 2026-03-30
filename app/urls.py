@@ -5,6 +5,7 @@ from django.conf.urls.static import static
 from accounts.views import register_view, login_view, logout_view
 from complaints.views import ComplaintsListView, ComplaintsDetailView, NewComplaintsCreateView, ComplaintsUpdateView, ComplaintsDeleteView, MyComplaintsListView, DashboardView, SuggestionView, vote_suggestion, HomeView
 
+
 urlpatterns = [
     path('', HomeView.as_view(), name='home'),
     #path('', ComplaintsListView.as_view(), name='complaints_list'),

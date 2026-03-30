@@ -1,13 +1,13 @@
 from django.db.models import Count  # Adicionado
 from .models import Complaints, Suggestion  # Adicionado
 from complaints.forms import ComplaintsModelForm
-from django.views.generic import TemplateView  # Adicionado
+from django.views.generic import TemplateView, ListView, UpdateView  # Adicionado
 from django.views.generic import ListView, CreateView, UpdateView, DetailView, DeleteView
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin  # Adicionado
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
-from django.shortcuts import redirect, get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404
 
 
 # Feed de todos
@@ -146,3 +146,31 @@ class HomeView(TemplateView):
         ).order_by('-total')[:3]
         
         return context
+
+
+#  Dashboard do Orgão
+class DashboardOrgaoView(LoginRequiredMixin, UserPassesTestMixin, ListView):
+    model = Complaints
+    template_name = 'orgao/dashboard.html'
+    context_object_name = 'complaints'
+    ordering = ['-created_at']
+
+    # Substitui o @staff_member_required
+    def test_func(self):
+        return self.request.user.is_staff
+
+
+#  Gerencia Reclamação
+class GerenciarReclamacaoView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = Complaints
+    template_name = 'orgao/gerenciar.html'
+    fields = ['status', 'feedback_agency'] # Campos que o órgão pode editar
+    success_url = reverse_lazy('dashboard_orgao')
+
+    def test_func(self):
+        return self.request.user.is_staff
+
+    # Caso você queira fazer algo extra ao salvar (como enviar e-mail)
+    def form_valid(self, form):
+        # Aqui o form já validou os campos
+        return super().form_valid(form)
