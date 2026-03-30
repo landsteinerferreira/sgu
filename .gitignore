@@ -1,2 +1,5 @@
 *.sqlite3
 __pycache__/
+staticfiles/
+static/admin/
+static/jazzmin/
