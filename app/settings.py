@@ -127,6 +127,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 
 
 JAZZMIN_SETTINGS = {
+    
     # Título da aba do navegador
     "site_title": "Solicita Cidadão Admin",
     
@@ -210,8 +211,8 @@ JAZZMIN_UI_TWEAKS = {
     "sidebar_nav_compact_style": False,
     "sidebar_nav_legacy_style": False,
     "sidebar_nav_flat_style": False,
-    "theme": "default",
-    "dark_mode_theme": None,
+    "theme": "cerulean",
+    "theme_mode": "auto",
     "button_classes": {
         "primary": "btn-primary",
         "secondary": "btn-secondary",
@@ -231,4 +232,4 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD') # Use senha de app do Google
-DEFAULT_FROM_EMAIL = 'Solicita Cidadão <{EMAIL_HOST_USER}>'
+DEFAULT_FROM_EMAIL = f'Solicita Cidadão <{EMAIL_HOST_USER}>'
