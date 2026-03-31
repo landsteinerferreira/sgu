@@ -1,7 +1,9 @@
 import os
+from dotenv import load_dotenv
 from pathlib import Path
 
 
+load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -10,10 +12,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-c-nahu&!vpu+l@e@qk%j4iv379!gq$wc1efz1k31+a$5flt*bu'
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = os.getenv('DEBUG') == 'True'
 
 ALLOWED_HOSTS = ['129.148.28.59', 'solicitacidadao.duckdns.org', 'localhost', '127.0.0.1']
 
@@ -227,6 +229,6 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'solicitacidadao@gmail.com'
-EMAIL_HOST_PASSWORD = 'cxte rqjj jfjq  hstb' # Use senha de app do Google
-DEFAULT_FROM_EMAIL = 'Solicita Cidadão <solicitacidadao@gmail.com>'
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD') # Use senha de app do Google
+DEFAULT_FROM_EMAIL = 'Solicita Cidadão <{EMAIL_HOST_USER}>'

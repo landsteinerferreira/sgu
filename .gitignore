@@ -3,3 +3,4 @@ __pycache__/
 staticfiles/
 static/admin/
 static/jazzmin/
+.env
