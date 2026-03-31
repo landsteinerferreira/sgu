@@ -1,0 +1,23 @@
+<div style="font-family: 'Open Sans', sans-serif; color: #2d3436; max-width: 600px; margin: 0 auto; border: 1px solid #eee; border-radius: 12px; overflow: hidden;">
+    <div style="background-color: #0096c7; padding: 20px; text-align: center;">
+        <h1 style="color: white; margin: 0;">Solicita Cidadão</h1>
+    </div>
+    <div style="padding: 30px;">
+        <h2>Olá, {{ usuario }}!</h2>
+        <p>Houve uma atualização no status da sua solicitação: <strong>{{ titulo }}</strong></p>
+        
+        <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center; margin: 20px 0;">
+            <p style="margin: 0; font-size: 0.9rem; text-transform: uppercase; color: #636e72;">Novo Status:</p>
+            <h3 style="margin: 5px 0; color: #0096c7; font-size: 1.5rem;">{{ status }}</h3>
+        </div>
+
+        <p>Para ver mais detalhes ou conferir a resposta da prefeitura, clique no botão abaixo:</p>
+        
+        <div style="text-align: center; margin-top: 30px;">
+            <a href="{{ link }}" style="background-color: #0096c7; color: white; padding: 12px 25px; text-decoration: none; border-radius: 8px; font-weight: bold;">Ver Solicitação</a>
+        </div>
+    </div>
+    <div style="background-color: #f1f2f6; padding: 15px; text-align: center; font-size: 0.8rem; color: #95a5a6;">
+        Este é um e-mail automático enviado pelo sistema Solicita Cidadão.
+    </div>
+</div>
