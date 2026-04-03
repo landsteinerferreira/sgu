@@ -6,7 +6,7 @@
     .form-wrapper {
         display: flex;
         justify-content: center;
-        align-items: flex-start; /* Alinha no topo para formulários longos */
+        align-items: flex-start;
         min-height: calc(100vh - 200px);
         padding: 2rem 1rem;
     }
@@ -30,6 +30,44 @@
         font-size: 1.6rem;
     }
 
+    /* Botão de Localização Estilizado */
+    .btn-geo-capture {
+        width: 100%;
+        background-color: #f0f7ff;
+        color: var(--primary-color);
+        padding: 12px;
+        border: 2px dashed var(--primary-color);
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        margin-bottom: 1.5rem;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .btn-geo-capture:hover {
+        background-color: var(--primary-color);
+        color: white;
+    }
+
+    .btn-geo-capture.success {
+        border-color: #10b981;
+        color: #10b981;
+        background-color: #ecfdf5;
+    }
+
+    #geo-status-text {
+        display: block;
+        text-align: center;
+        font-size: 0.85rem;
+        color: #666;
+        margin-top: -1rem;
+        margin-bottom: 1.5rem;
+    }
+
     /* 3. Transformando a Tabela do Django em Layout Vertical */
     .form-card table {
         width: 100%;
@@ -38,7 +76,7 @@
 
     .form-card tr {
         display: flex;
-        flex-direction: column; /* Label em cima do Input */
+        flex-direction: column;
         margin-bottom: 1.5rem;
     }
 
@@ -49,7 +87,6 @@
         color: var(--text-dark);
     }
 
-    /* Estilização de Inputs, Textareas e Selects */
     .form-card td input, 
     .form-card td select, 
     .form-card td textarea {
@@ -62,7 +99,6 @@
         transition: all 0.3s ease;
     }
 
-    /* Destaque para o campo de Upload de Arquivo */
     .form-card td input[type="file"] {
         padding: 8px;
         border: 1px dashed var(--primary-color);
@@ -77,13 +113,6 @@
         box-shadow: 0 0 0 4px rgba(0, 150, 199, 0.1);
     }
 
-    /* Ajuste para Checkboxes (se houver) */
-    .form-card td input[type="checkbox"] {
-        width: auto;
-        margin-right: 10px;
-    }
-
-    /* Erros do Formulário */
     .errorlist {
         color: #ef4444;
         list-style: none;
@@ -113,7 +142,6 @@
         transform: translateY(-2px);
     }
 
-    /* Responsividade extra */
     @media (max-width: 480px) {
         .form-card {
             padding: 1.5rem;
@@ -123,10 +151,18 @@
 
 <div class="form-wrapper">
     <div class="form-card">
-        <h2>Registrar Dados</h2>
+        <h2>Registrar Solicitação</h2>
         
-        <form action="" method="post" enctype="multipart/form-data">
+        <form action="" method="post" enctype="multipart/form-data" id="main-complaint-form">
             {% csrf_token %}
+
+            <input type="hidden" name="latitude" id="id_latitude">
+            <input type="hidden" name="longitude" id="id_longitude">
+
+            <button type="button" class="btn-geo-capture" id="btn-geo" onclick="requestLocation()">
+                <i class="fas fa-location-arrow"></i> <span>Capturar Localização Atual</span>
+            </button>
+            <small id="geo-status-text">Clique para vincular o local exato ao protocolo.</small>
 
             <table>
                 {{ form.as_table }}
@@ -136,4 +172,59 @@
         </form>
     </div>
 </div>
+
+<script>
+    function requestLocation() {
+        const btn = document.getElementById('btn-geo');
+        const statusText = document.getElementById('geo-status-text');
+        const latInput = document.getElementById('id_latitude');
+        const lonInput = document.getElementById('id_longitude');
+
+        if (!navigator.geolocation) {
+            statusText.innerHTML = "❌ Navegador não suporta geolocalização.";
+            return;
+        }
+
+        btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Buscando Satélite...';
+        btn.disabled = true;
+
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const lat = position.coords.latitude;
+                const lon = position.coords.longitude;
+                
+                latInput.value = lat;
+                lonInput.value = lon;
+
+                btn.innerHTML = '<i class="fas fa-check-circle"></i> Localização Vinculada!';
+                btn.classList.add('success');
+                btn.disabled = false;
+                statusText.innerHTML = "✅ GPS capturado com precisão de " + position.coords.accuracy.toFixed(0) + " metros.";
+                statusText.style.color = "#10b981";
+            },
+            (error) => {
+                btn.innerHTML = '<i class="fas fa-times-circle"></i> Erro na Captura';
+                btn.disabled = false;
+                btn.style.borderColor = "#ef4444";
+                btn.style.color = "#ef4444";
+                
+                if (error.code === 1) {
+                    statusText.innerHTML = "❌ Permissão negada. Ative o GPS nas configurações.";
+                } else {
+                    statusText.innerHTML = "❌ Não foi possível obter sua localização.";
+                }
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 15000,
+                maximumAge: 0
+            }
+        );
+    }
+
+    // Tenta capturar automaticamente ao carregar a página para maior conveniência
+    window.onload = function() {
+        requestLocation();
+    };
+</script>
 {% endblock %}

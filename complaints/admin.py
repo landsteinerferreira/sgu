@@ -9,50 +9,52 @@ class CategoryAdmin(admin.ModelAdmin):
 
 @admin.register(Complaints)
 class ComplaintsAdmin(admin.ModelAdmin):
-    # CORREÇÃO: Adicionei 'status' e 'priority' aqui para o list_editable funcionar
+    # Exibição na lista principal
     list_display = (
-        'protocolo', 
+        'id_protocolo', 
         'title', 
         'sector', 
-        'status',           # Campo original (necessário para o editable)
-        'status_badge',     # Versão visual com badge
-        'priority',         # Campo original (necessário para o editable)
-        'priority_badge',   # Versão visual com badge
+        'status',           # Necessário para list_editable
+        'priority',         # Necessário para list_editable
+        'status_badge', 
+        'priority_badge', 
         'user', 
         'created_at'
     )
     
-    # Agora o Django vai permitir editar sem reclamar
     list_editable = ('status', 'priority')
-    
     list_filter = ('status', 'priority', 'sector', 'category', 'created_at')
     search_fields = ('title', 'description', 'address', 'user__username')
     list_per_page = 20
 
+    # Organização por Abas (Fieldsets)
     fieldsets = (
         ('Dados do Cidadão', {
             'fields': (('user', 'category'), 'title', 'description', 'photo_view'),
         }),
         ('Localização', {
-            'fields': ('sector', 'address'),
+            'fields': ('sector', 'address', 'location'), # ADICIONADO 'location' aqui
+            'description': 'O mapa abaixo indica a posição exata da ocorrência.',
         }),
         ('Ação da Prefeitura', {
             'fields': ('priority', 'status', 'feedback_agency'),
         }),
     )
 
-    readonly_fields = ('user', 'title', 'description', 'category', 'sector', 'address', 'photo_view', 'created_at')
+    # Campos que o administrador não pode alterar manualmente
+    readonly_fields = ('user', 'title', 'description', 'category', 'photo_view', 'created_at')
 
-    # --- Funções Auxiliares ---
-    def protocolo(self, obj):
+    # --- Funções Visuais ---
+    
+    def id_protocolo(self, obj):
         return format_html("<b>#{}</b>", obj.id)
-    protocolo.short_description = 'Prot.'
+    id_protocolo.short_description = 'Prot.'
 
     def status_badge(self, obj):
         colors = {'OPEN': 'warning', 'IN_PROGRESS': 'primary', 'RESOLVED': 'success', 'CANCELED': 'danger'}
         badge_class = colors.get(obj.status, 'secondary')
         return format_html('<span class="badge badge-{}">{}</span>', badge_class, obj.get_status_display())
-    status_badge.short_description = 'Visual'
+    status_badge.short_description = 'Status Visual'
 
     def priority_badge(self, obj):
         colors = {'HIGH': 'danger', 'MEDIUM': 'warning', 'LOW': 'info'}
@@ -62,9 +64,13 @@ class ComplaintsAdmin(admin.ModelAdmin):
 
     def photo_view(self, obj):
         if obj.photo:
-            return format_html('<img src="{}" style="max-height: 200px; border-radius: 8px;" />', obj.photo.url)
-        return "Sem foto"
+            return format_html('<img src="{}" style="max-height: 250px; border-radius: 10px; border: 1px solid #ccc;" />', obj.photo.url)
+        return "Sem foto enviada"
 
 @admin.register(Suggestion)
 class SuggestionAdmin(admin.ModelAdmin):
-    list_display = ('title', 'user', 'total_votes', 'created_at')
+    list_display = ('title', 'user', 'total_votes_display', 'created_at')
+    
+    def total_votes_display(self, obj):
+        return obj.total_votes()
+    total_votes_display.short_description = 'Votos'

@@ -70,9 +70,23 @@ class NewComplaintsCreateView(CreateView):
     success_url = '/complaints/'
 
     def form_valid(self, form):
+        # 1. Atribui o usuário logado à solicitação
         form.instance.user = self.request.user
+        
+        # 2. Captura a latitude e longitude enviadas pelo JavaScript do front-end
+        lat = self.request.POST.get('latitude')
+        lon = self.request.POST.get('longitude')
+        
+        # 3. Se as coordenadas existirem, salva nos campos do modelo
+        if lat and lon:
+            form.instance.latitude = lat
+            form.instance.longitude = lon
+            # Opcional: Atualiza o campo 'location' para o mapa do Admin ler
+            form.instance.location = f"{lat},{lon}"
+            
+        messages.success(self.request, "Solicitação enviada com sucesso e localização registrada!")
         return super().form_valid(form)
-
+    
 
 @method_decorator(login_required(login_url='login'), name='dispatch')
 class ComplaintsUpdateView(UpdateView):

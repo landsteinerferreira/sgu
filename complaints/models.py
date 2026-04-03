@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from location_field.models.plain import PlainLocationField
 
 
 STATUS_CHOICES = [
@@ -137,13 +138,20 @@ class Complaints(models.Model):
     category = models.ForeignKey(Category, on_delete=models.PROTECT, related_name='complaint_category', verbose_name='Categoria')
     status = models.CharField(max_length=200, choices=STATUS_CHOICES, default='OPEN', verbose_name='Status')
     priority = models.CharField(max_length=20, choices=PRIORITY_CHOICES, default='MEDIUM', verbose_name='Prioridade')
+    # Campos de localização
     address = models.CharField(max_length=255, verbose_name='Endereço')
     sector = models.CharField(max_length=100, choices=SECTOR_CHOICES, default='selecione_bairro', verbose_name='Bairro')
+    # Campo para o mapa focar em Trindade-Go.
+    city = models.CharField(max_length=255, default='Trindade, Goiás', editable=False)
+    # Campo do Mapa Interativo
+    location = PlainLocationField(based_fields=['city'], zoom=14, default='-16.6497,-49.4935', verbose_name='Mapa')
+    latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     photo = models.ImageField(upload_to='complaints/', blank=True, null=True, verbose_name='Foto')
     user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Usuário')
     feedback_agency = models.TextField(blank=True, null=True, verbose_name='Resposta do Órgão')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Data de Criação')
-    updated_at = models.DateTimeField(auto_now_add=True, verbose_name='Data de atualização')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='Data de atualização')
 
     def __str__(self):
         return self.title

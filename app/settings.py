@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'complaints',
     'accounts',
+    'location_field.apps.DefaultConfig',
 ]
 
 MIDDLEWARE = [
@@ -234,3 +235,12 @@ EMAIL_USE_SSL = False
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD') # Use senha de app do Google
 DEFAULT_FROM_EMAIL = os.getenv('EMAIL_HOST_USER')
+
+
+# Mapas interativos
+LOCATION_FIELD = {
+    'map_widgets': (
+        'location_field.widgets.LeafletWidget',
+    ),
+    'provider': 'openstreetmap',
+}
