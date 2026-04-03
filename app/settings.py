@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     'complaints',
     'accounts',
     'location_field.apps.DefaultConfig',
+    'pwa',
 ]
 
 MIDDLEWARE = [
@@ -244,3 +245,36 @@ LOCATION_FIELD = {
     ),
     'provider': 'openstreetmap',
 }
+
+
+# Configurações do PWA
+PWA_APP_NAME = 'Solicita Cidadão'
+PWA_APP_DESCRIPTION = "Zeladoria Urbana de Trindade"
+PWA_APP_THEME_COLOR = '#0096C7'
+PWA_APP_BACKGROUND_COLOR = '#ffffff'
+PWA_APP_DISPLAY = 'standalone'
+PWA_APP_SCOPE = '/'
+PWA_APP_START_URL = '/'
+PWA_APP_STATUS_BAR_COLOR = 'default'
+
+# O segredo para o PWA ativar no navegador é o Service Worker
+# Esta linha aponta para o arquivo que o collectstatic gera
+PWA_SERVICE_WORKER_PATH = os.path.join(BASE_DIR, 'static/js', 'serviceworker.js')
+
+PWA_APP_ICONS = [
+    {
+        'src': '/static/images/icon-160x160.png',
+        'sizes': '160x160',
+        'type': 'image/png'
+    },
+    {
+        'src': '/static/images/icon-512x512.png',
+        'sizes': '512x512',
+        'type': 'image/png'
+    }
+]
+
+# Configurações para iOS
+PWA_APP_ICONS_APPLE = PWA_APP_ICONS
+PWA_APP_DIR = 'ltr'
+PWA_APP_LANG = 'pt-BR'

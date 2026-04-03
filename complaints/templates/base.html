@@ -1,4 +1,5 @@
 {% load static %}
+{% load pwa %}
 <!DOCTYPE html>
 <html lang="pt-br">
 
@@ -8,6 +9,9 @@
     <title>{% block title %}Solicita Cidadão{% endblock %}</title>
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    {% comment %} Comente temporariamente as tags do PWA para o site carregar {% endcomment %}
+    {% comment %} {% progressive_web_app_meta %} {% endcomment %}
+<link rel="manifest" href="/manifest.json">
     <style>
         :root {
             --primary-color: #0096c7;
