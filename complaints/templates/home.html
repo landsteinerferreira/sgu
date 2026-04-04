@@ -5,7 +5,7 @@
 
 {% block content %}
 <style>
-    /* 1. VARIÁVEIS E BASE (Seu Layout Original) */
+    /* 1. VARIÁVEIS E BASE */
     :root {
         --primary-color: #0096c7;
         --primary-hover: #0077b6;
@@ -21,15 +21,13 @@
         line-height: 1.6;
     }
 
-    /* 2. HERO SECTION (Layout Original com ajuste de Padding) */
+    /* 2. HERO SECTION */
     .hero {
         background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
         color: white;
         padding: 80px 20px 120px;
-        /* Aumentei o padding inferior para os cards encaixarem */
         text-align: center;
         border-radius: 0 0 40px 40px;
-        margin-bottom: 0;
         box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
     }
 
@@ -43,17 +41,16 @@
     .hero p {
         font-size: 1.2rem;
         max-width: 750px;
-        margin: 0 auto 30px;
+        margin: 0 auto;
         opacity: 0.95;
     }
 
-    /* 3. NOVOS CARDS DE PERFIL (Estilo flutuante) */
+    /* 3. CARDS DE ACESSO RÁPIDO */
     .profile-selection {
         display: flex;
         justify-content: center;
         gap: 25px;
         margin-top: -60px;
-        /* Faz os cards "subirem" sobre o azul */
         padding: 0 20px 60px;
         position: relative;
         z-index: 10;
@@ -79,63 +76,71 @@
         border-color: var(--primary-color);
     }
 
-    .profile-card .profile-icon {
-        font-size: 3rem;
-        margin-bottom: 15px;
-        display: block;
+    .profile-icon { font-size: 3rem; margin-bottom: 15px; display: block; }
+    .profile-card h3 { font-size: 1.4rem; font-weight: 800; margin-bottom: 10px; }
+    .btn-profile { 
+        display: inline-block; 
+        padding: 10px 25px; 
+        border-radius: 8px; 
+        font-weight: 700; 
+        margin-top: 15px; 
     }
 
-    .profile-card h3 {
-        font-size: 1.4rem;
-        margin-bottom: 10px;
-        font-weight: 800;
-        color: var(--text-dark);
+    /* 4. BANNER PWA MINIMALISTA */
+    .pwa-banner-clean {
+        background: var(--white);
+        border-radius: 20px;
+        padding: 25px 40px;
+        margin: 20px 0 60px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+        border: 1px solid var(--gray-light);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
     }
 
-    .profile-card p {
-        font-size: 0.9rem;
-        color: #636e72;
-        margin-bottom: 20px;
-        min-height: 50px;
+    .pwa-info {
+        display: flex;
+        align-items: center;
+        gap: 20px;
     }
 
-    .btn-profile {
-        display: inline-block;
-        padding: 10px 20px;
-        border-radius: 8px;
-        font-weight: 700;
-        font-size: 0.9rem;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
-    .btn-citizen {
-        background: var(--primary-color);
-        color: white;
-    }
-
-    .btn-gov {
-        background: var(--text-dark);
-        color: white;
-    }
-
-    /* 4. FEATURES E IMPACTO (Seu Layout Original) */
-    .section-title {
-        text-align: center;
-        margin-bottom: 40px;
-        margin-top: 20px;
-    }
-
-    .section-title h2 {
-        font-size: 2rem;
+    .pwa-info i {
+        font-size: 2.2rem;
         color: var(--primary-color);
+        background: rgba(0, 150, 199, 0.1);
+        padding: 15px;
+        border-radius: 12px;
     }
 
+    .pwa-text h4 { margin: 0; font-weight: 800; color: var(--text-dark); }
+    .pwa-text p { margin: 0; font-size: 0.9rem; color: #636e72; }
+
+    .pwa-badges {
+        display: flex;
+        gap: 12px;
+    }
+
+    .badge-step {
+        background: var(--bg-light);
+        padding: 8px 16px;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border: 1px solid #ddd;
+    }
+
+    /* 5. SEÇÕES DE IMPACTO E FEATURES */
     .features-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
         gap: 25px;
-        margin-bottom: 60px;
+        margin: 40px 0;
     }
 
     .feature-card {
@@ -144,32 +149,29 @@
         border-radius: 15px;
         text-align: center;
         border: 1px solid #eee;
+        position: relative; /* Necessário para o selo Em Breve */
         transition: all 0.3s ease;
-        position: relative;
     }
-
+    
     .feature-card:hover {
         transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.08);
         border-color: var(--primary-color);
     }
 
-    .icon-box {
-        font-size: 3rem;
-        margin-bottom: 15px;
-        display: block;
-    }
-
+    /* Selo EM BREVE */
     .badge-coming-soon {
         position: absolute;
         top: -12px;
         left: 50%;
         transform: translateX(-50%);
-        background: #636e72;
+        background: #636e72; /* Cinza Chumbo */
         color: white;
         font-size: 0.7rem;
         padding: 4px 12px;
         border-radius: 20px;
         font-weight: 700;
+        letter-spacing: 0.5px;
     }
 
     .impact-banner {
@@ -178,97 +180,119 @@
         border-radius: 20px;
         padding: 50px 20px;
         display: flex;
-        flex-wrap: wrap;
         justify-content: space-around;
         text-align: center;
-        margin-bottom: 60px;
+        margin-bottom: 40px;
     }
 
-    .stat-item h2 {
-        font-size: 2.5rem;
-        color: var(--primary-color);
-        margin-bottom: 5px;
+    /* Hover nos stats da base */
+    .stat-item {
+        padding: 20px;
+        border-radius: 15px;
+        transition: all 0.3s ease;
+    }
+    .stat-item:hover {
+        background: rgba(255,255,255,0.05);
+        transform: scale(1.05);
+    }
+
+    .stat-item h2 { font-size: 2.5rem; color: var(--primary-color); margin-bottom: 5px; }
+
+    /* Hover no CTA Final */
+    .btn-cta-final {
+        display: inline-block; 
+        max-width: 350px; 
+        background: var(--primary-color); 
+        color: white; 
+        border: none; 
+        padding: 20px;
+        text-decoration: none;
+        border-radius: 15px;
+        font-weight: 700;
+        transition: all 0.3s ease;
+        box-shadow: 0 10px 20px rgba(0, 150, 199, 0.2);
+    }
+    
+    .btn-cta-final:hover {
+        background: var(--primary-hover);
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0, 150, 199, 0.3);
+        color: white;
+    }
+
+    /* RESPONSIVIDADE */
+    @media (max-width: 992px) {
+        .pwa-banner-clean { flex-direction: column; text-align: center; padding: 30px; }
+        .pwa-info { flex-direction: column; }
+        .pwa-badges { flex-direction: column; width: 100%; }
+        .badge-step { justify-content: center; }
     }
 
     @media (max-width: 768px) {
-        .hero h1 {
-            font-size: 2.2rem;
-        }
-
-        .profile-selection {
-            flex-direction: column;
-            align-items: center;
-            margin-top: -80px;
-        }
-
-        .profile-card {
-            max-width: 100%;
-        }
+        .hero h1 { font-size: 2.2rem; }
+        .profile-selection { flex-direction: column; align-items: center; margin-top: -80px; }
     }
 </style>
 
 <div class="home-wrapper">
-    <!-- HERO SECTION -->
     <section class="hero">
         <div class="container">
             <h1>Zele pela sua Cidade.</h1>
-            <p>O <strong>Solicita Cidadão</strong> conecta você à gestão pública de Trindade. Relate problemas, sugira
-                melhorias e acompanhe o progresso do seu bairro.</p>
+            <p>O <strong>Solicita Cidadão</strong> conecta você à gestão pública de Trindade. Relate problemas e acompanhe o progresso do seu bairro.</p>
         </div>
     </section>
 
-    <!-- NOVA SEÇÃO DE ACESSO RÁPIDO (Seus novos cards) -->
     <section class="profile-selection container">
-        <!-- Card Cidadão -->
         <a href="{% url 'complaints_list' %}" class="profile-card">
             <span class="profile-icon">🏘️</span>
             <h3>Sou Cidadão</h3>
-            <p>Acesse o feed de solicitações, registre novas ocorrências ou envie sugestões para a prefeitura.</p>
-            <span class="btn-profile btn-citizen">Acessar Plataforma</span>
+            <p>Acesse o feed de solicitações, registre ocorrências ou envie sugestões.</p>
+            <span class="btn-profile" style="background: var(--primary-color); color: white;">Acessar Plataforma</span>
         </a>
 
-        <!-- Card Governo -->
-        <a href="/admin/" class="profile-card" target="_blank" rel="noopener noreferrer">
+        <a href="/admin/" class="profile-card" target="_blank">
             <span class="profile-icon">🏛️</span>
             <h3>Sou Governo</h3>
-            <p>Área restrita para servidores públicos realizarem triagem, resposta e gestão das demandas oficiais.</p>
-            <span class="btn-profile btn-gov">Painel de Gestão</span>
+            <p>Área restrita para servidores públicos realizarem a gestão das demandas oficiais.</p>
+            <span class="btn-profile" style="background: var(--text-dark); color: white;">Painel de Gestão</span>
         </a>
     </section>
 
-    <!-- CONTEÚDO ORIGINAL ABAIXO -->
-    <div class="container" style="max-width: 1100px; margin: 0 auto; padding: 0 20px;">
-        <div class="section-title">
-            <h2>Como você pode ajudar?</h2>
-            <p>A cidadania ativa começa com um simples registro.</p>
-        </div>
-
+    <div class="container" style="max-width: 1100px;">
+        
         <section class="features-grid">
             <div class="feature-card">
-                <span class="icon-box">📸</span>
+                <span style="font-size: 3rem; display: block; margin-bottom: 15px;">📸</span>
                 <h3>Relate com Fotos</h3>
-                <p>Envie fotos reais dos problemas. Isso ajuda a equipe técnica a priorizar e resolver as ocorrências.
-                </p>
+                <p>Envie fotos reais dos problemas para priorizar os reparos.</p>
             </div>
-
             <div class="feature-card">
-                <span class="icon-box">💡</span>
+                <span style="font-size: 3rem; display: block; margin-bottom: 15px;">💡</span>
                 <h3>Mural de Ideias</h3>
-                <p>Propor é tão importante quanto reclamar. Use nosso mural para sugerir melhorias para a comunidade.
-                </p>
+                <p>Proponha melhorias e participe ativamente da sua comunidade.</p>
             </div>
-
-            <div class="feature-card" style="background: #fafafa; border-style: dashed;">
+            <div class="feature-card" style="background: #fafafa; border-style: dashed; opacity: 0.8;">
                 <span class="badge-coming-soon">EM BREVE</span>
-                <div style="opacity: 0.6;">
-                    <span class="icon-box">🚀</span>
-                    <h3>Status em Tempo Real</h3>
-                    <p>Notificações automáticas a cada passo da sua solicitação, do recebimento ao reparo.</p>
-                </div>
+                <span style="font-size: 3rem; display: block; margin-bottom: 15px;">🚀</span>
+                <h3>Tempo Real</h3>
+                <p>Acompanhe o status da sua solicitação até a resolução final.</p>
             </div>
         </section>
 
-        <!-- IMPACT BANNER -->
+        <section class="pwa-banner-clean">
+            <div class="pwa-info">
+                <i class="bi bi-cloud-arrow-down"></i>
+                <div class="pwa-text">
+                    <h4>Solicita Cidadão no seu Celular</h4>
+                    <p>Instale agora e acesse como um aplicativo nativo.</p>
+                </div>
+            </div>
+            <div class="pwa-badges">
+                <div class="badge-step"><i class="bi bi-android2 text-success"></i> Chrome: Menu > Instalar</div>
+                <div class="badge-step"><i class="bi bi-apple"></i> Safari: Compartilhar > Tela de Início</div>
+            </div>
+        </section>
+
         <section class="impact-banner">
             <div class="stat-item">
                 <h2>{{ total_complaints|default:"0" }}</h2>
@@ -279,15 +303,15 @@
                 <p>Transparência</p>
             </div>
             <div class="stat-item">
-                <h2>Cidadão</h2>
-                <p>Protagonista</p>
+                <h2>Trindade</h2>
+                <p>Goiás</p>
             </div>
         </section>
 
-        <div style="text-align: center; padding-bottom: 60px;">
-            <a href="{% url 'complaints_list' %}" class="profile-card"
-                style="display:inline-block; max-width: 300px; background: var(--primary-color); color: white; border: none;">Ver
-                Feed de Ocorrências</a>
+        <div style="text-align: center; padding-bottom: 80px;">
+            <a href="{% url 'complaints_list' %}" class="btn-cta-final">
+               Feed de Ocorrências
+            </a>
         </div>
     </div>
 </div>
