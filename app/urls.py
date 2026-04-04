@@ -10,20 +10,23 @@ from complaints.views import (
 )
 
 urlpatterns = [
-    # 1. PWA e ADMIN (Devem vir primeiro para o manifesto ser encontrado)
+    # 1. PWA (O PWA precisa da raiz para registrar o Service Worker corretamente)
     path('', include('pwa.urls')), 
-    path('admin/', admin.site.urls),
-    path('admin/dashboard-stats/', AdminDashboardStatsView.as_view(), name='admin_stats'),
 
-    # 2. PÁGINA INICIAL
+    # 2. ADMIN E DASHBOARD CUSTOMIZADA
+    # Colocamos a dashboard ANTES do admin padrão para garantir a precedência da rota
+    path('admin/dashboard-stats/', AdminDashboardStatsView.as_view(), name='admin_dashboard_stats'),
+    path('admin/', admin.site.urls),
+
+    # 3. PÁGINA INICIAL (HOME)
     path('', HomeView.as_view(), name='home'),
 
-    # 3. CONTAS
+    # 4. CONTAS / AUTENTICAÇÃO
     path('accounts/register/', register_view, name='register'),
     path('accounts/login/', login_view, name='login'),
     path('logout/', logout_view, name='logout'),
 
-    # 4. SOLICITAÇÕES (COMPLAINTS)
+    # 5. SOLICITAÇÕES (COMPLAINTS)
     path('complaints/', ComplaintsListView.as_view(), name='complaints_list'),
     path('my_complaints/', MyComplaintsListView.as_view(), name='my_complaints'),
     path('new_complaints/', NewComplaintsCreateView.as_view(), name='new_complaints'),
@@ -31,12 +34,18 @@ urlpatterns = [
     path('complaints/<int:pk>/update/', ComplaintsUpdateView.as_view(), name='complaints_update'),
     path('complaints/<int:pk>/delete/', ComplaintsDeleteView.as_view(), name='complaints_delete'),
     
-    # 5. DASHBOARD E SUGESTÕES
+    # 6. DASHBOARD DO USUÁRIO E SUGESTÕES
     path('dashboard/', DashboardView.as_view(), name='dashboard'),
     path('sugestoes/', SuggestionView.as_view(), name='suggestions'),
     path('sugestoes/votar/<int:pk>/', vote_suggestion, name='vote_suggestion'),
 
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+]
 
-# Garante que estáticos funcionem em qualquer ambiente
-urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+# 7. ARQUIVOS DE MÍDIA E ESTÁTICOS
+# Adicionando de forma robusta para desenvolvimento e produção
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+else:
+    # Em produção, o WhiteNoise ou Nginx cuida disso, mas mantemos o mapeamento de Media
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

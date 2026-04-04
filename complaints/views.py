@@ -1,18 +1,26 @@
-from django.db.models import Q
-from django.db.models import Count  # Adicionado
-from .models import Complaints, Suggestion  # Adicionado
-from complaints.forms import ComplaintsModelForm
-from django.views.generic import TemplateView, ListView, UpdateView  # Adicionado
-from django.views.generic import ListView, CreateView, UpdateView, DetailView, DeleteView
+from django.db.models import Q, Count
 from django.urls import reverse_lazy
 from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin  # Adicionado
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import redirect, get_object_or_404
+from django.views.generic import (
+    TemplateView, ListView, CreateView, UpdateView, DetailView, DeleteView
+)
+from .models import Complaints, Suggestion
+from complaints.forms import ComplaintsModelForm
 
+# --- MIXINS DE REUTILIZAÇÃO ---
 
-# Feed de todos
+class OwnerOnlyMixin(UserPassesTestMixin):
+    """Garante que apenas o dono do registro possa editá-lo ou deletá-lo."""
+    def test_func(self):
+        obj = self.get_object()
+        return self.request.user == obj.user
+
+# --- SOLICITAÇÕES (COMPLAINTS) ---
+
 class ComplaintsListView(ListView):
     model = Complaints
     template_name = 'complaints.html'
@@ -20,132 +28,100 @@ class ComplaintsListView(ListView):
     paginate_by = 10
 
     def get_queryset(self):
-        # Filtro base
-        queryset = Complaints.objects.filter(
+        # select_related('category') evita múltiplas consultas ao banco para o nome da categoria
+        queryset = Complaints.objects.select_related('category').filter(
             status__in=['OPEN', 'IN_PROGRESS']
         ).order_by('-created_at')
 
-        # Lógica de busca
-        search_query = self.request.GET.get('search')
-        if search_query:
+        search = self.request.GET.get('search')
+        if search:
             queryset = queryset.filter(
-                Q(title__icontains=search_query) | 
-                Q(description__icontains=search_query)
+                Q(title__icontains=search) | Q(description__icontains=search)
             )
         return queryset
 
-
-# Minhas Solicitações
 @method_decorator(login_required(login_url='login'), name='dispatch')
 class MyComplaintsListView(ComplaintsListView):
-    # Opcional: Se quiser um template diferente para as "Minhas"
-    # template_name = 'my_complaints.html' 
-
+    """Reutiliza a lógica de busca, mas filtra apenas as do usuário."""
     def get_queryset(self):
-        # 1. Começamos do zero (todos os registros do usuário logado)
-        # Diferente da classe pai, aqui NÃO filtramos por status fixo
-        queryset = Complaints.objects.filter(user=self.request.user).order_by('-created_at')
-
-        # 2. Reutilizamos a lógica de busca por texto (Barra de Pesquisa)
-        search_query = self.request.GET.get('search')
-        if search_query:
-            queryset = queryset.filter(
-                Q(title__icontains=search_query) | 
-                Q(description__icontains=search_query)
-            )
+        queryset = Complaints.objects.select_related('category').filter(
+            user=self.request.user
+        ).order_by('-created_at')
         
+        search = self.request.GET.get('search')
+        if search:
+            queryset = queryset.filter(
+                Q(title__icontains=search) | Q(description__icontains=search)
+            )
         return queryset
-
 
 class ComplaintsDetailView(DetailView):
     model = Complaints
     template_name = 'complaints_detail.html'
-
+    # select_related aqui garante que os detalhes da categoria carreguem rápido
+    queryset = Complaints.objects.select_related('category', 'user')
 
 @method_decorator(login_required(login_url='login'), name='dispatch')
 class NewComplaintsCreateView(CreateView):
     model = Complaints
     form_class = ComplaintsModelForm
     template_name = 'new_complaints.html'
-    success_url = '/complaints/'
+    success_url = reverse_lazy('complaints_list')
 
     def form_valid(self, form):
-        # 1. Atribui o usuário logado à solicitação
         form.instance.user = self.request.user
         
-        # 2. Captura a latitude e longitude enviadas pelo JavaScript do front-end
+        # Coleta geolocalização do POST (via JS no frontend)
         lat = self.request.POST.get('latitude')
         lon = self.request.POST.get('longitude')
         
-        # 3. Se as coordenadas existirem, salva nos campos do modelo
         if lat and lon:
             form.instance.latitude = lat
             form.instance.longitude = lon
-            # Opcional: Atualiza o campo 'location' para o mapa do Admin ler
             form.instance.location = f"{lat},{lon}"
             
-        messages.success(self.request, "Solicitação enviada com sucesso e localização registrada!")
+        messages.success(self.request, "Solicitação enviada com sucesso!")
         return super().form_valid(form)
-    
 
-@method_decorator(login_required(login_url='login'), name='dispatch')
-class ComplaintsUpdateView(UpdateView):
-    model = Complaints  # Modelo
+class ComplaintsUpdateView(LoginRequiredMixin, OwnerOnlyMixin, UpdateView):
+    model = Complaints
     form_class = ComplaintsModelForm
     template_name = 'complaints_update.html'
-
-    # página 403 personalizada
     raise_exception = True 
-
-    # Teste de segurança
-    def test_func(self):
-        complaint = self.get_object()
-        return self.request.user == complaint.user  # Retorna True se for o dono
 
     def get_success_url(self):
         return reverse_lazy('complaints_detail', kwargs={'pk': self.object.pk})
     
     def dispatch(self, request, *args, **kwargs):
         obj = self.get_object()
-        # Se tentar editar algo que não está aberto ou em progresso, bloqueia
+        # Regra de negócio: Finalizadas são imutáveis para o cidadão
         if obj.status not in ['OPEN', 'IN_PROGRESS']:
             messages.error(request, "Solicitações finalizadas não podem ser editadas.")
             return redirect('complaints_detail', pk=obj.pk)
         return super().dispatch(request, *args, **kwargs)
 
-
-@method_decorator(login_required(login_url='login'), name='dispatch')
-class ComplaintsDeleteView(DeleteView):
-    model = Complaints  # Modelo
+class ComplaintsDeleteView(LoginRequiredMixin, OwnerOnlyMixin, DeleteView):
+    model = Complaints
     template_name = 'complaints_delete.html'
-    success_url = '/complaints/'
+    success_url = reverse_lazy('complaints_list')
 
+# --- DASHBOARDS E SUGESTÕES ---
 
 class DashboardView(LoginRequiredMixin, TemplateView):
     template_name = 'dashboard.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
-        # 1. Estatísticas Gerais
-        context['total_complaints'] = Complaints.objects.count()
-        context['my_complaints_count'] = Complaints.objects.filter(user=self.request.user).count()
-
-        # 2. Reclamações por Categoria (Top 5)
-        # Isso retorna algo como: [{'category__name': 'Buraco', 'total': 10}, ...]
-        context['categories_chart'] = Complaints.objects.values('category__name').annotate(
-            total=Count('id')
-        ).order_by('-total')[:5]
-
-        # 3. Reclamações por Setor/Bairro
-        context['sectors_chart'] = Complaints.objects.values('sector').annotate(
-            total=Count('id')
-        ).order_by('-total')[:5]
-
+        user_complaints = Complaints.objects.filter(user=self.request.user)
+        
+        context.update({
+            'total_complaints': Complaints.objects.count(),
+            'my_complaints_count': user_complaints.count(),
+            'categories_chart': Complaints.objects.values('category__name').annotate(total=Count('id')).order_by('-total')[:5],
+            'sectors_chart': Complaints.objects.values('sector').annotate(total=Count('id')).order_by('-total')[:5],
+        })
         return context
 
-
-#  Sugestões
 class SuggestionView(LoginRequiredMixin, CreateView):
     model = Suggestion
     template_name = 'suggestions.html'
@@ -154,18 +130,16 @@ class SuggestionView(LoginRequiredMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['suggestions'] = Suggestion.objects.all()
+        # Ordena pelas mais votadas primeiro
+        context['suggestions'] = Suggestion.objects.annotate(num_votes=Count('votes')).order_by('-num_votes')
         return context
 
     def form_valid(self, form):
         form.instance.user = self.request.user
         return super().form_valid(form)
 
-
-# View rápida para votar
 @login_required
 def vote_suggestion(request, pk):
-
     suggestion = get_object_or_404(Suggestion, pk=pk)
     if suggestion.votes.filter(id=request.user.id).exists():
         suggestion.votes.remove(request.user)
@@ -173,47 +147,52 @@ def vote_suggestion(request, pk):
         suggestion.votes.add(request.user)
     return redirect('suggestions')
 
+# --- PÁGINAS PÚBLICAS / ADMIN ---
 
 class HomeView(TemplateView):
     template_name = 'home.html'
 
     def get_context_data(self, **kwargs):
-        # Chama a implementação base primeiro para pegar o contexto padrão
         context = super().get_context_data(**kwargs)
-        
-        # Adiciona dados dinâmicos para a Landing Page
-        context['total_complaints'] = Complaints.objects.count()
-        context['resolved_complaints'] = Complaints.objects.filter(status='resolvido').count()
-        
-        # Opcional: Pegar os 3 bairros mais ativos para mostrar na Home
-        context['top_sectors'] = Complaints.objects.values('sector').annotate(
-            total=Count('id')
-        ).order_by('-total')[:3]
-        
+        context.update({
+            'total_complaints': Complaints.objects.count(),
+            'resolved_complaints': Complaints.objects.filter(status='RESOLVED').count(),
+            'top_sectors': Complaints.objects.values('sector').annotate(total=Count('id')).order_by('-total')[:3],
+        })
         return context
 
-#  Dashboard dentro do Admin do Django
 class AdminDashboardStatsView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     template_name = 'admin/dashboard_stats.html'
 
-    # Garante que apenas Staff (equipe) acesse essa view
     def test_func(self):
         return self.request.user.is_staff
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         
-        # Dados para os Cards
-        context['total_complaints'] = Complaints.objects.count()
-        context['open_complaints'] = Complaints.objects.filter(status='OPEN').count()
-        context['in_progress'] = Complaints.objects.filter(status='IN_PROGRESS').count()
-        context['resolved'] = Complaints.objects.filter(status='RESOLVED').count()
+        # Agrupando consultas de contagem para performance
+        stats = Complaints.objects.aggregate(
+            total=Count('id'),
+            open=Count('id', filter=Q(status='OPEN')),
+            progress=Count('id', filter=Q(status='IN_PROGRESS')),
+            resolved=Count('id', filter=Q(status='RESOLVED'))
+        )
         
-        # Dados para Gráficos ou Listas (ex: Top 5 bairros com problemas)
-        context['sector_stats'] = Complaints.objects.values('sector').annotate(
-            total=Count('id')
-        ).order_by('-total')[:5]
-
-        # Título da página para o Jazzmin
-        context['title'] = "Painel de Indicadores"
+        context.update({
+            'title': "Painel de Indicadores",
+            'total_complaints': stats['total'],
+            'open_complaints': stats['open'],
+            'in_progress': stats['progress'],
+            'resolved': stats['resolved'],
+            # Dados geográficos para os pinos do Leaflet (Incluindo ID para o popup)
+            'map_points': Complaints.objects.exclude(latitude__isnull=True).values(
+                'id', 'latitude', 'longitude', 'title', 'category__name', 'status'
+            ),
+            # Ranking de Setores para a Tabela
+            'all_sector_stats': Complaints.objects.values('sector').annotate(
+                total=Count('id'),
+                abertas=Count('id', filter=Q(status='OPEN')),
+                resolvidas=Count('id', filter=Q(status='RESOLVED'))
+            ).order_by('-total')
+        })
         return context
