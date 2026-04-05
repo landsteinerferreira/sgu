@@ -9,9 +9,7 @@
     <title>{% block title %}Solicita Cidadão{% endblock %}</title>
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-    {% comment %} Comente temporariamente as tags do PWA para o site carregar {% endcomment %}
-    {% comment %} {% progressive_web_app_meta %} {% endcomment %}
-<link rel="manifest" href="/manifest.json">
+    <link rel="manifest" href="/manifest.json">
     <style>
         :root {
             --primary-color: #0096c7;
@@ -20,13 +18,10 @@
             --text-dark: #2d3436;
             --white: #ffffff;
             --gray-light: #e9ecef;
+            --danger: #ef4444;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
             font-family: 'Open Sans', sans-serif;
@@ -38,7 +33,6 @@
             min-height: 100vh;
         }
 
-        /* --- Header & Nav --- */
         header {
             background-color: var(--white);
             box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
@@ -57,174 +51,75 @@
             align-items: center;
         }
 
-        .nav-logo {
-            display: flex;
-            align-items: center;
-            text-decoration: none;
-            z-index: 1100;
-        }
+        .nav-logo img { height: 55px; transition: transform 0.3s ease; }
+        .nav-logo:hover img { transform: scale(1.05); }
 
-        .nav-logo img {
-            height: 55px;
-            width: auto;
-            object-fit: contain;
-            transition: transform 0.3s ease;
-        }
-
-        .nav-logo:hover img {
-            transform: scale(1.05);
-        }
-
-        /* Menu Desktop */
         .nav-menu {
             list-style: none;
             display: flex;
             align-items: center;
-            gap: 5px;
-            transition: 0.3s ease;
+            gap: 10px;
         }
 
-        .nav-menu li span {
-            color: var(--text-dark);
-            font-size: 0.85rem;
-            margin-right: 15px;
-            font-weight: 600;
-            padding: 5px 12px;
-            background: var(--gray-light);
-            border-radius: 20px;
+        /* ESTILO DO NOME DO USUÁRIO (Lado Direito) */
+        .user-info-box {
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 8px;
+            padding: 6px 14px;
+            background: var(--gray-light);
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-left: 10px;
         }
 
         .nav-menu li a {
             color: var(--text-dark);
             text-decoration: none;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             font-weight: 600;
-            padding: 0.6rem 1rem;
+            padding: 0.6rem 0.8rem;
             border-radius: 8px;
             transition: all 0.3s ease;
-            border-bottom: 2px solid transparent;
         }
 
-        /* Efeito HOVER (Passar o mouse) */
-        .nav-menu li a:hover {
-            color: var(--primary-color);
-            background-color: rgba(0, 150, 199, 0.08);
-        }
-
-        /* Efeito ACTIVE (Página selecionada) */
+        .nav-menu li a:hover { color: var(--primary-color); background-color: rgba(0, 150, 199, 0.08); }
+        
         .nav-menu li a.active {
             color: var(--primary-color);
             background-color: rgba(0, 150, 199, 0.12);
             border-bottom: 2px solid var(--primary-color);
         }
 
-        /* Estilo especial para Botão de Login */
         .btn-login {
             background: var(--primary-color) !important;
             color: white !important;
             padding: 8px 20px !important;
             border-radius: 8px !important;
-            border-bottom: none !important;
         }
 
-        .btn-login:hover {
-            background: var(--primary-hover) !important;
-            transform: translateY(-2px);
-        }
+        /* Mobile */
+        .hamburger { display: none; cursor: pointer; background: none; border: none; }
+        .bar { display: block; width: 25px; height: 3px; margin: 5px auto; background-color: var(--primary-color); border-radius: 2px; }
 
-        /* Botão Hambúrguer */
-        .hamburger {
-            display: none;
-            cursor: pointer;
-            background: none;
-            border: none;
-            z-index: 1100;
-            padding: 10px;
-        }
+        main { flex: 1; width: 100%; max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
 
-        .bar {
-            display: block;
-            width: 28px;
-            height: 3px;
-            margin: 5px auto;
-            transition: all 0.3s ease-in-out;
-            background-color: var(--primary-color);
-            border-radius: 2px;
-        }
+        footer { background-color: var(--text-dark); color: var(--white); padding: 2.5rem 1rem; text-align: center; }
+        footer p { font-size: 0.9rem; margin-bottom: 5px; }
+        footer .brand-v { font-weight: 700; color: var(--primary-color); opacity: 1 !important; margin-top: 15px; display: block; }
 
-        /* --- Main Content --- */
-        main {
-            flex: 1;
-            width: 100%;
-            max-width: 1200px;
-            margin: 2rem auto;
-            padding: 0 1rem;
-        }
-
-        /* --- Footer --- */
-        footer {
-            background-color: var(--text-dark);
-            color: var(--white);
-            padding: 3rem 1rem;
-            text-align: center;
-            margin-top: auto;
-        }
-
-        footer p {
-            font-size: 0.9rem;
-            opacity: 0.9;
-        }
-
-        footer small {
-            display: block;
-            opacity: 0.6;
-            margin-top: 10px;
-        }
-
-        /* --- Responsividade Mobile --- */
         @media (max-width: 992px) {
-            .hamburger {
-                display: block;
-            }
-
+            .hamburger { display: block; }
             .nav-menu {
-                position: fixed;
-                right: -100%;
-                top: 0;
-                flex-direction: column;
-                background-color: var(--white);
-                width: 80%;
-                max-width: 300px;
-                height: 100vh;
-                padding-top: 100px;
-                gap: 10px;
-                box-shadow: -10px 0 20px rgba(0, 0, 0, 0.1);
-                z-index: 1000;
-                align-items: flex-start;
-                padding-left: 2rem;
+                position: fixed; right: -100%; top: 0; flex-direction: column;
+                background-color: var(--white); width: 280px; height: 100vh;
+                padding-top: 80px; box-shadow: -10px 0 20px rgba(0, 0, 0, 0.1);
+                transition: 0.4s; align-items: flex-start; padding-left: 1.5rem;
             }
-
-            .nav-menu.active {
-                right: 0;
-            }
-
-            .nav-menu li a {
-                width: 90%;
-                border-bottom: none;
-            }
-
-            .nav-menu li a.active {
-                border-left: 4px solid var(--primary-color);
-                border-bottom: none;
-                border-radius: 0 8px 8px 0;
-            }
-
-            .hamburger.active .bar:nth-child(2) { opacity: 0; }
-            .hamburger.active .bar:nth-child(1) { transform: translateY(8px) rotate(45deg); }
-            .hamburger.active .bar:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+            .nav-menu.active { right: 0; }
+            .user-info-box { margin-left: 0; margin-bottom: 15px; width: 90%; }
         }
     </style>
 </head>
@@ -236,80 +131,50 @@
                 <img src="{% static 'images/logo_solicita_cidadao.png' %}" alt="Solicita Cidadão">
             </a>
 
-            <button class="hamburger" id="hamburger" aria-label="Abrir Menu">
-                <span class="bar"></span>
-                <span class="bar"></span>
-                <span class="bar"></span>
+            <button class="hamburger" id="hamburger">
+                <span class="bar"></span><span class="bar"></span><span class="bar"></span>
             </button>
 
             <ul class="nav-menu" id="nav-menu">
-                <!-- LINK HOME -->
-                <li>
-                    <a href="{% url 'home' %}" class="{% if request.resolver_match.url_name == 'home' %}active{% endif %}">Home</a>
-                </li>
-
+                <li><a href="{% url 'home' %}" class="{% if request.resolver_match.url_name == 'home' %}active{% endif %}">Home</a></li>
+                
                 {% if user.is_authenticated %}
-                <li class="user-info">
-                    <span><i class="bi bi-person-circle"></i> {{ user.username }}</span>
-                </li>
-
-                <li>
-                    <a href="{% url 'dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">Dashboard</a>
-                </li>
-                <li>
-                    <a href="{% url 'suggestions' %}" class="{% if request.resolver_match.url_name == 'suggestions' %}active{% endif %}">Sugestões</a>
-                </li>
-                <li>
-                    <a href="{% url 'my_complaints' %}" class="{% if request.resolver_match.url_name == 'my_complaints' %}active{% endif %}">Minhas Solicitações</a>
-                </li>
-                <li>
-                    <a href="{% url 'new_complaints' %}" class="{% if request.resolver_match.url_name == 'new_complaints' %}active{% endif %}" style="color: var(--primary-color); font-weight: 700;">+ Nova Solicitação</a>
-                </li>
-                <li><a href="{% url 'logout' %}" style="color: #ef4444;">Sair</a></li>
+                    <li><a href="{% url 'dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">Dashboard</a></li>
+                    <li><a href="{% url 'suggestions' %}" class="{% if request.resolver_match.url_name == 'suggestions' %}active{% endif %}">Sugestões</a></li>
+                    <li><a href="{% url 'my_complaints' %}" class="{% if request.resolver_match.url_name == 'my_complaints' %}active{% endif %}">Minhas Solicitações</a></li>
+                    <li><a href="{% url 'new_complaints' %}" class="{% if request.resolver_match.url_name == 'new_complaints' %}active{% endif %}" style="font-weight: 700; color: var(--primary-color);">+ Nova</a></li>
+                    
+                    <li class="user-info-box">
+                        <i class="bi bi-person-circle"></i> {{ user.get_full_name|default:user.username }}
+                    </li>
+                    <li><a href="{% url 'logout' %}" style="color: var(--danger);">Sair</a></li>
                 
                 {% else %}
-                <li>
-                    <a href="{% url 'complaints_list' %}" class="{% if request.resolver_match.url_name == 'complaints_list' %}active{% endif %}">Ver Feed</a>
-                </li>
-                <li>
-                    <a href="{% url 'register' %}" class="{% if request.resolver_match.url_name == 'register' %}active{% endif %}">Cadastre-se</a>
-                </li>
-                <li>
-                    <a href="{% url 'login' %}" class="btn-login">Login</a>
-                </li>
+                    <li><a href="{% url 'complaints_list' %}" class="{% if request.resolver_match.url_name == 'complaints_list' %}active{% endif %}">Ver Feed</a></li>
+                    <li><a href="{% url 'register' %}" class="{% if request.resolver_match.url_name == 'register' %}active{% endif %}">Cadastre-se</a></li>
+                    <li><a href="{% url 'login' %}" class="btn-login">Login</a></li>
                 {% endif %}
             </ul>
         </nav>
     </header>
 
     <main id="main-content">
-        {% block content %}
-        {% endblock %}
+        {% block content %}{% endblock %}
     </main>
 
     <footer>
         <p>&copy; 2026 Solicita Cidadão. Todos os direitos reservados.</p>
         <p>Zelando por Trindade - GO</p>
-        <small>Projeto Acadêmico - Engenharia de Software USP <br> Desenvolvido por Landsteiner Ferreira</small>
+        <small>Engenharia de Software USP | Landsteiner Ferreira</small>
     </footer>
 
     <script>
         const hamburger = document.getElementById('hamburger');
         const navMenu = document.getElementById('nav-menu');
-
         hamburger.addEventListener('click', () => {
             hamburger.classList.toggle('active');
             navMenu.classList.toggle('active');
         });
-
-        // Fecha o menu ao clicar em um link (Mobile)
-        document.querySelectorAll('.nav-menu a').forEach(link => {
-            link.addEventListener('click', () => {
-                hamburger.classList.remove('active');
-                navMenu.classList.remove('active');
-            });
-        });
     </script>
 </body>
-
 </html>
