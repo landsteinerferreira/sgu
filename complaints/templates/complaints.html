@@ -104,35 +104,19 @@
     .card-body { padding: 20px; }
     .card-body h3 { margin-bottom: 8px; font-size: 1.1rem; color: #333; font-weight: 700; }
 
-    /* --- STATUS BADGES --- */
+    /* 3. STATUS BADGES - COERÊNCIA TOTAL */
     .status-badge-feed {
         font-size: 0.65rem;
         padding: 4px 12px;
         border-radius: 50px;
         font-weight: 800;
         text-transform: uppercase;
-        color: #fff !important; /* Texto sempre branco para contraste */
+        color: #fff !important;
     }
     
-    /* Aberta = Vermelho */
-    .status-open-feed { 
-        background-color: #dc3545 !important; 
-    } 
-
-    /* Em Progresso = Amarelo/Laranja (Warning) */
-    .status-progress-feed { 
-        background-color: #ffc107 !important; 
-        color: #000 !important; /* Texto preto no amarelo para leitura */
-    } 
-
-    /* Resolvida = Verde (Success) */
-    .status-resolved-feed { 
-        background-color: #28a745 !important; 
-    } 
-
-    .status-canceled-feed { 
-        background-color: #6c757d !important; 
-    }
+    .status-open-feed { background-color: #dc3545 !important; } 
+    .status-progress-feed { background-color: #ffc107 !important; color: #000 !important; } 
+    .status-resolved-feed { background-color: #28a745 !important; } 
 
     /* 4. COMPARTILHAMENTO SOCIAL */
     .share-container {
@@ -162,8 +146,6 @@
         text-decoration: none;
         font-weight: 700;
     }
-
-    #loading-sentinel { text-align: center; padding: 20px; color: #888; }
 </style>
 
 <section class="search-section">
@@ -180,7 +162,9 @@
             <div class="card-header">
                 <div class="user-avatar">👤</div>
                 <div style="flex: 1;">
-                    <h4 style="margin:0; font-size: 0.95rem; font-weight: 700;">{{ complaint.user.username }}</h4>
+                    <h4 style="margin:0; font-size: 0.95rem; font-weight: 700;">
+                        {{ complaint.user.get_full_name|default:complaint.user.username }}
+                    </h4>
                     <small style="color: #888;">{{ complaint.get_sector_display|default:complaint.sector }} • há {{ complaint.created_at|timesince }}</small>
                 </div>
                 <span class="status-badge-feed 
@@ -223,13 +207,6 @@
         <div style="text-align: center; padding: 50px; color: #888;">
             <h3>Nenhuma solicitação encontrada em Trindade.</h3>
         </div>
-    {% endif %}
-</div>
-
-<div id="loading-sentinel">
-    {% if page_obj.has_next %}
-        <a id="next-page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" style="display: none;">Próxima</a>
-        <p id="loader-status">Carregando mais ocorrências...</p>
     {% endif %}
 </div>
 {% endblock %}
