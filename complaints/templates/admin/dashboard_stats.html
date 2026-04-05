@@ -4,29 +4,13 @@
 {% block content %}
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://leaflet.github.io/Leaflet.heat/dist/leaflet-heat.js"></script>
 
 <style>
-    /* ESTILIZAÇÃO KPI - TEXTO BRANCO E SOMBRA */
-    .small-box {
-        color: #ffffff !important;
-        border-radius: 10px;
-        overflow: hidden;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    }
-
-    .small-box h3, .small-box p {
-        color: #ffffff !important;
-        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
-    }
-
+    .small-box { color: #ffffff !important; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); }
+    .small-box h3, .small-box p { color: #ffffff !important; text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2); }
     .small-box h3 { font-weight: 800 !important; font-size: 2.2rem !important; }
-    .small-box p { font-weight: 600 !important; font-size: 1.1rem !important; }
-    .small-box .icon > i { color: rgba(255, 255, 255, 0.3) !important; }
-
-    #map {
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        border: 1px solid #ddd;
-    }
+    #map { box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); border: 1px solid #ddd; }
 </style>
 
 <div class="container-fluid">
@@ -37,21 +21,18 @@
                 <div class="icon"><i class="fas fa-list"></i></div>
             </div>
         </div>
-
         <div class="col-lg-3 col-6">
             <div class="small-box bg-danger">
                 <div class="inner"><h3>{{ open_complaints }}</h3><p>Abertas</p></div>
                 <div class="icon"><i class="fas fa-exclamation-triangle"></i></div>
             </div>
         </div>
-
         <div class="col-lg-3 col-6">
             <div class="small-box bg-warning">
                 <div class="inner"><h3>{{ in_progress }}</h3><p>Em Progresso</p></div>
                 <div class="icon"><i class="fas fa-tools"></i></div>
             </div>
         </div>
-
         <div class="col-lg-3 col-6">
             <div class="small-box bg-success">
                 <div class="inner"><h3>{{ resolved }}</h3><p>Resolvidas</p></div>
@@ -64,7 +45,7 @@
         <div class="col-md-8">
             <div class="card card-outline card-primary">
                 <div class="card-header">
-                    <h3 class="card-title text-bold"><i class="fas fa-map-marked-alt mr-1"></i> Inteligência Geográfica (Trindade-GO)</h3>
+                    <h3 class="card-title text-bold"><i class="fas fa-fire mr-1"></i> Mapa de Inteligência Geográfica de Incidências</h3>
                 </div>
                 <div class="card-body">
                     <div id="map" style="height: 550px; border-radius: 8px;"></div>
@@ -79,12 +60,12 @@
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
-                        <table class="table table-striped table-valign-middle mb-0">
+                        <table class="table table-striped mb-0">
                             <thead>
                                 <tr>
                                     <th>Setor</th>
                                     <th>Total</th>
-                                    <th>Status (Ab/Res)</th>
+                                    <th>Ab/Res</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -93,12 +74,12 @@
                                     <td class="text-bold">{{ sector.sector }}</td>
                                     <td><span class="badge badge-primary">{{ sector.total }}</span></td>
                                     <td>
-                                        <span class="text-danger text-bold">{{ sector.abertas }}</span> / 
-                                        <span class="text-success text-bold">{{ sector.resolvidas }}</span>
+                                        <span class="text-danger">{{ sector.abertas }}</span> / 
+                                        <span class="text-success">{{ sector.resolvidas }}</span>
                                     </td>
                                 </tr>
                                 {% empty %}
-                                <tr><td colspan="3" class="text-center text-muted">Nenhum registro.</td></tr>
+                                <tr><td colspan="3" class="text-center">Nenhum registro.</td></tr>
                                 {% endfor %}
                             </tbody>
                         </table>
@@ -110,55 +91,69 @@
 </div>
 
 <script>
-    // Inicialização do Mapa
     var map = L.map('map').setView([-16.6497, -49.4889], 13);
 
     L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
-        subdomains: 'abcd',
-        maxZoom: 20
+        attribution: '&copy; CARTO'
     }).addTo(map);
 
-    // Plotagem dos Pontos
+    var heatData = [];
+    
+    // Plotagem combinada: Calor + Pontos Detalhados
     {% for point in map_points %}
     (function() {
         var lat = parseFloat("{{ point.latitude }}".replace(',', '.'));
         var lon = parseFloat("{{ point.longitude }}".replace(',', '.'));
         
         if (!isNaN(lat) && !isNaN(lon)) {
-            // Lógica de Tradução e Cor
+            // Adiciona ao array de calor (intensidade 0.7)
+            heatData.push([lat, lon, 0.7]);
+
+            // Lógica de Cores Dinâmicas baseada no Status (Consistência Operacional)
             var statusDB = "{{ point.status }}";
             var statusLabel = "Aberto";
-            var statusColor = "red";
+            var statusColor = "#dc3545"; // Vermelho (Igual ao Card Aberto/Danger)
 
             if (statusDB === "IN_PROGRESS") {
                 statusLabel = "Em Progresso";
-                statusColor = "orange";
+                statusColor = "#ffc107"; // Amarelo (Igual ao Card Progresso/Warning)
             } else if (statusDB === "RESOLVED") {
                 statusLabel = "Resolvido";
-                statusColor = "green";
+                statusColor = "#28a745"; // Verde (Igual ao Card Resolvido/Success)
             }
 
-            var marker = L.marker([lat, lon]).addTo(map);
-            
-            // Layout do Popup
-            marker.bindPopup(`
-                <div style="font-family: 'Open Sans', sans-serif; min-width: 160px;">
+            // Adiciona o marcador físico (ponto) com a cor correspondente
+            L.circleMarker([lat, lon], {
+                radius: 6,
+                fillColor: statusColor,
+                color: "#fff",
+                weight: 1,
+                fillOpacity: 0.8
+            }).addTo(map).bindPopup(`
+                <div style="font-family: 'Open Sans', sans-serif; min-width: 220px;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                        <span style="font-size: 10px; color: #888;">#ID: {{ point.id }}</span>
-                        <span style="font-size: 10px; font-weight: bold; color: ${statusColor}; border: 1px solid ${statusColor}; padding: 1px 5px; border-radius: 4px; text-transform: uppercase;">
+                        <span style="font-size: 11px; color: #888;">#ID: {{ point.id }}</span>
+                        <span style="font-size: 11px; font-weight: bold; color: #fff; background-color: ${statusColor}; padding: 2px 8px; border-radius: 4px; text-transform: uppercase;">
                             ${statusLabel}
                         </span>
                     </div>
-                    <h6 style="margin: 0; color: #007bff; font-weight: 800;">{{ point.category__name }}</h6>
-                    <p style="margin: 5px 0 8px; font-size: 13px; color: #333; line-height: 1.2;">{{ point.title }}</p>
-                    <a href="/admin/complaints/complaints/{{ point.id }}/change/" class="btn btn-xs btn-block btn-primary text-white" style="font-size: 11px; font-weight: 600;">
-                        <i class="fas fa-edit mr-1"></i> Abrir no Admin
+                    <h6 style="margin: 0; color: #007bff; font-weight: 800; font-size: 15px;">{{ point.category__name }}</h6>
+                    <p style="margin: 5px 0 10px; font-size: 14px; color: #333; line-height: 1.3;">{{ point.title }}</p>
+                    <a href="/admin/complaints/complaints/{{ point.id }}/change/" target="_blank" class="btn btn-xs btn-block btn-primary text-white" style="font-size: 12px; font-weight: 600; padding: 8px; border-radius: 6px; text-decoration: none; display: block;">
+                        <i class="fas fa-edit mr-1"></i> Analisar Ocorrência Completa
                     </a>
                 </div>
             `);
         }
     })();
     {% endfor %}
+
+    // Inicializa a camada de calor (Heatmap)
+    var heat = L.heatLayer(heatData, {
+        radius: 25,
+        blur: 15,
+        maxZoom: 10,
+        gradient: {0.4: 'blue', 0.65: 'lime', 1: 'red'}
+    }).addTo(map);
 </script>
 {% endblock %}

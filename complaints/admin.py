@@ -23,7 +23,7 @@ class ComplaintsAdmin(admin.ModelAdmin):
             'fields': ('sector', 'address', 'map_view'),
         }),
         ('Gestão e Resposta da Prefeitura', {
-            'fields': ('priority', 'status', 'feedback_agency'), # Campos soltos para o CSS alinhar
+            'fields': ('priority', 'status', 'feedback_agency'),
         }),
     )
 
@@ -43,63 +43,22 @@ class ComplaintsAdmin(admin.ModelAdmin):
 
     def change_view(self, request, object_id, form_url='', extra_context=None):
         extra_context = extra_context or {}
-        # ESTE CSS É O "TRATOR" QUE VAI MOVER OS CAMPOS
         extra_context['jazzmin_custom_css'] = """
-            /* Força os containers de Priority e Status a ficarem lado a lado */
             .field-priority, .field-status {
-                display: block !important;
-                float: left !important;
-                width: 50% !important;
-                padding: 20px !important;
-                box-sizing: border-box !important;
-                background: #f8f9fa !important; /* Fundo leve para destacar */
-                border: 1px solid #eee !important;
+                display: block !important; float: left !important; width: 50% !important;
+                padding: 20px !important; box-sizing: border-box !important;
+                background: #f8f9fa !important; border: 1px solid #eee !important;
             }
-
-            /* Faz o seletor (dropdown) ocupar 100% do seu container de 50% */
-            .field-priority select, .field-status select {
-                width: 100% !important;
-                min-width: 100% !important;
-                display: block !important;
-                height: 45px !important;
-                font-size: 16px !important;
-            }
-
-            /* Reseta o float para o campo de Resposta não subir */
-            .field-feedback_agency {
-                clear: both !important;
-                width: 100% !important;
-                display: block !important;
-                padding: 20px !important;
-                border-top: 2px solid #007bff !important;
-                margin-top: 10px !important;
-            }
-
-            .field-feedback_agency textarea {
-                width: 100% !important;
-                min-height: 200px !important;
-                border: 2px solid #ced4da !important;
-            }
-
-            /* Ajuste de Labels */
-            .form-group label {
-                width: 100% !important;
-                margin-bottom: 10px !important;
-                font-weight: bold !important;
-            }
-            
-            /* Remove margens negativas do Jazzmin que esmagam os campos */
-            .form-horizontal .form-group {
-                margin-left: 0 !important;
-                margin-right: 0 !important;
-            }
+            .field-feedback_agency { clear: both !important; width: 100% !important; padding: 20px !important; border-top: 2px solid #007bff !important; }
+            .field-feedback_agency textarea { width: 100% !important; min-height: 200px !important; }
+            .form-group label { width: 100% !important; margin-bottom: 10px !important; font-weight: bold !important; }
+            .form-horizontal .form-group { margin-left: 0 !important; margin-right: 0 !important; }
         """
         return super().change_view(request, object_id, form_url, extra_context=extra_context)
 
-    # --- MÉTODOS AUXILIARES ---
+    # --- MÉTODOS VISUAIS ---
     def id_protocolo(self, obj):
         return format_html("<b>#{}</b>", obj.id)
-    id_protocolo.short_description = 'Prot.'
 
     def status_badge(self, obj):
         map_status = {'OPEN': ('warning', 'Aberto'), 'IN_PROGRESS': ('primary', 'Atendimento'), 'RESOLVED': ('success', 'Resolvido')}
@@ -112,13 +71,16 @@ class ComplaintsAdmin(admin.ModelAdmin):
         return format_html('<span class="badge badge-{}">{}</span>', color, label)
 
     def photo_view(self, obj):
-        if obj.photo:
-            return format_html('<img src="{}" style="max-height: 300px; border-radius: 8px;"/>', obj.photo.url)
+        if obj.photo: return format_html('<img src="{}" style="max-height: 300px; border-radius: 8px;"/>', obj.photo.url)
         return "Sem foto."
 
     def map_view(self, obj):
-        if not obj.latitude or not obj.longitude: 
-            return "Coordenadas GPS não disponíveis."
+        if not obj.latitude or not obj.longitude: return "GPS indisponível."
+        
+        # DEFINIÇÃO DE CORES (IDÊNTICAS AO DASHBOARD)
+        # Usamos o Status para a cor do pino e a Prioridade para o texto, mantendo a coerência.
+        color_map = {'OPEN': '#dc3545', 'IN_PROGRESS': '#ffc107', 'RESOLVED': '#28a745'}
+        status_color = color_map.get(obj.status, '#6c757d')
 
         return format_html(
             '''
@@ -130,23 +92,27 @@ class ComplaintsAdmin(admin.ModelAdmin):
                     setTimeout(function() {{
                         var lat = parseFloat("{lat}");
                         var lon = parseFloat("{lon}");
-                        
                         if (isNaN(lat) || isNaN(lon)) return;
 
                         var map = L.map('map_canvas', {{fullscreenControl: true}}).setView([lat, lon], 17);
-                        L.tileLayer('https://{{s}}.basemaps.cartocdn.com/rastertiles/voyager/{{z}}/{{x}}/{{y}}{{r}}.png', {{
-                            attribution: 'OSM/CARTO'
-                        }}).addTo(map);
+                        L.tileLayer('https://{{s}}.basemaps.cartocdn.com/rastertiles/voyager/{{z}}/{{x}}/{{y}}{{r}}.png').addTo(map);
                         
-                        var marker = L.marker([lat, lon]).addTo(map);
-                        
-                        // POPUP SIMPLIFICADO: TÍTULO E DESCRIÇÃO
-                        marker.bindPopup(`
-                            <div style="min-width: 200px; font-family: 'Open Sans', sans-serif;">
-                                <small style="color: #888;">#ID {id}</small>
-                                <hr style="margin: 10px 0;">
-                                <h6 style="margin: 0 0 5px; color: #007bff; font-weight: bold; font-size: 14px;">{title}</h6>
-                                <p style="margin: 0; font-size: 13px; color: #333; line-height: 1.4;">{description}</p>
+                        // CÍRCULO COLORIDO (ESTILO DASHBOARD)
+                        L.circleMarker([lat, lon], {{
+                            radius: 12,
+                            fillColor: "{color}",
+                            color: "#fff",
+                            weight: 3,
+                            opacity: 1,
+                            fillOpacity: 0.9
+                        }}).addTo(map).bindPopup(`
+                            <div style="min-width: 200px; font-family: sans-serif;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                    <small>#ID: {id}</small>
+                                    <span style="font-size: 10px; font-weight: bold; color: #fff; background-color: {color}; padding: 2px 6px; border-radius: 4px;">{status}</span>
+                                </div>
+                                <h6 style="margin: 0; color: #007bff; font-weight: bold;">{title}</h6>
+                                <p style="margin: 5px 0; font-size: 13px; color: #333;">{description}</p>
                             </div>
                         `).openPopup();
 
@@ -157,9 +123,11 @@ class ComplaintsAdmin(admin.ModelAdmin):
             ''',
             lat=obj.latitude,
             lon=obj.longitude,
+            color=status_color,
             id=obj.id,
             title=obj.title,
-            description=obj.description if obj.description else "Sem descrição detalhada."
+            status=obj.get_status_display().upper(),
+            description=obj.description if obj.description else ""
         )
 
 @admin.register(Suggestion)
