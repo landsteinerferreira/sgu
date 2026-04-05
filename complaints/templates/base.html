@@ -38,7 +38,7 @@
             box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
             position: sticky;
             top: 0;
-            z-index: 1000;
+            z-index: 2000; /* Aumentado para ficar sobre tudo */
         }
 
         nav {
@@ -61,7 +61,6 @@
             gap: 10px;
         }
 
-        /* ESTILO DO NOME DO USUÁRIO (Lado Direito) */
         .user-info-box {
             display: flex;
             align-items: center;
@@ -100,26 +99,64 @@
             border-radius: 8px !important;
         }
 
-        /* Mobile */
-        .hamburger { display: none; cursor: pointer; background: none; border: none; }
-        .bar { display: block; width: 25px; height: 3px; margin: 5px auto; background-color: var(--primary-color); border-radius: 2px; }
+        /* Mobile Hamburger */
+        .hamburger { display: none; cursor: pointer; background: none; border: none; padding: 10px; }
+        .bar { display: block; width: 25px; height: 3px; margin: 5px auto; background-color: var(--primary-color); border-radius: 2px; transition: 0.3s; }
+
+        /* Animação do Hamburger */
+        .hamburger.active .bar:nth-child(2) { opacity: 0; }
+        .hamburger.active .bar:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+        .hamburger.active .bar:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
 
         main { flex: 1; width: 100%; max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
 
         footer { background-color: var(--text-dark); color: var(--white); padding: 2.5rem 1rem; text-align: center; }
-        footer p { font-size: 0.9rem; margin-bottom: 5px; }
-        footer .brand-v { font-weight: 700; color: var(--primary-color); opacity: 1 !important; margin-top: 15px; display: block; }
+        footer .brand-v { font-weight: 700; color: var(--primary-color); margin-top: 15px; display: block; }
 
+        /* Ajustes Mobile */
         @media (max-width: 992px) {
-            .hamburger { display: block; }
+            .hamburger { display: block; z-index: 2100; }
+            
             .nav-menu {
-                position: fixed; right: -100%; top: 0; flex-direction: column;
-                background-color: var(--white); width: 280px; height: 100vh;
-                padding-top: 80px; box-shadow: -10px 0 20px rgba(0, 0, 0, 0.1);
-                transition: 0.4s; align-items: flex-start; padding-left: 1.5rem;
+                position: fixed;
+                right: -100%;
+                top: 0;
+                flex-direction: column;
+                background-color: var(--white);
+                width: 75%;
+                max-width: 300px;
+                height: 100vh;
+                padding: 100px 1.5rem 2rem 1.5rem; /* Padding superior para não cobrir o logo */
+                box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+                transition: 0.4s ease-in-out;
+                align-items: flex-start;
+                z-index: 2050;
             }
+
             .nav-menu.active { right: 0; }
-            .user-info-box { margin-left: 0; margin-bottom: 15px; width: 90%; }
+
+            .nav-menu li { width: 100%; margin-bottom: 5px; }
+
+            .nav-menu li a { 
+                display: block; 
+                width: 100%; 
+                padding: 12px; 
+                font-size: 1rem;
+            }
+
+            .user-info-box { 
+                margin-left: 0; 
+                margin-top: 10px; 
+                margin-bottom: 20px; 
+                width: 100%; 
+                justify-content: flex-start; 
+            }
+
+            .nav-menu li a.active {
+                border-bottom: none;
+                border-left: 4px solid var(--primary-color);
+                border-radius: 0 8px 8px 0;
+            }
         }
     </style>
 </head>
@@ -131,8 +168,10 @@
                 <img src="{% static 'images/logo_solicita_cidadao.png' %}" alt="Solicita Cidadão">
             </a>
 
-            <button class="hamburger" id="hamburger">
-                <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+            <button class="hamburger" id="hamburger" aria-label="Menu de navegação">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
             </button>
 
             <ul class="nav-menu" id="nav-menu">
@@ -142,7 +181,7 @@
                     <li><a href="{% url 'dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">Dashboard</a></li>
                     <li><a href="{% url 'suggestions' %}" class="{% if request.resolver_match.url_name == 'suggestions' %}active{% endif %}">Sugestões</a></li>
                     <li><a href="{% url 'my_complaints' %}" class="{% if request.resolver_match.url_name == 'my_complaints' %}active{% endif %}">Minhas Solicitações</a></li>
-                    <li><a href="{% url 'new_complaints' %}" class="{% if request.resolver_match.url_name == 'new_complaints' %}active{% endif %}" style="font-weight: 700; color: var(--primary-color);">+ Nova</a></li>
+                    <li><a href="{% url 'new_complaints' %}" class="{% if request.resolver_match.url_name == 'new_complaints' %}active{% endif %}" style="font-weight: 700; color: var(--primary-color);">+ Nova Solicitação</a></li>
                     
                     <li class="user-info-box">
                         <i class="bi bi-person-circle"></i> {{ user.get_full_name|default:user.username }}
@@ -171,9 +210,18 @@
     <script>
         const hamburger = document.getElementById('hamburger');
         const navMenu = document.getElementById('nav-menu');
+        
         hamburger.addEventListener('click', () => {
             hamburger.classList.toggle('active');
             navMenu.classList.toggle('active');
+        });
+
+        // Fechar menu ao clicar fora dele (UX de Sênior)
+        document.addEventListener('click', (e) => {
+            if (!navMenu.contains(e.target) && !hamburger.contains(e.target)) {
+                hamburger.classList.remove('active');
+                navMenu.classList.remove('active');
+            }
         });
     </script>
 </body>
