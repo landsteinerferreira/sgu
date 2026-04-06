@@ -74,11 +74,11 @@ DATABASES = {
     'default': {
         #  Usando postgresql
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'complaints', #  Nome do banco
-        'USER': 'postgres', #  Usuario
-        'PASSWORD': 'Lands@a627ha', #  Senha
-        'HOST': 'localhost', #  Local so servidor
-        'PORT': '5432', # Porta
+        'NAME': os.getenv('DB_NAME'), #  Nome do banco
+        'USER': os.getenv('DB_USER'), #  Usuario
+        'PASSWORD': os.getenv('DB_PASSWORD'), #  Senha
+        'HOST': os.getenv('DB_HOST'), #  Local so servidor
+        'PORT': os.getenv('DB_PORT'), # Porta
         #  Usando o sqlite3
         #'ENGINE': 'django.db.backends.sqlite3',
         # 'NAME': BASE_DIR / 'db.sqlite3',
