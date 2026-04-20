@@ -5,7 +5,7 @@ from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 
-# --- FUNÇÃO DE E-MAIL (MANTIDA) ---
+# --- FUNÇÃO DE E-MAIL  ---
 def enviar_email_status(instance):
     try:
         subject = f'Atualização: Sua solicitação #{instance.pk} mudou de status'
@@ -30,7 +30,7 @@ def enviar_email_status(instance):
     except Exception as e:
         print(f"ERRO AO ENVIAR E-MAIL: {e}")
 
-# --- SINAL: NOTIFICAÇÃO DE STATUS (MANTIDO) ---
+# --- SINAL: NOTIFICAÇÃO DE STATUS ---
 @receiver(pre_save, sender='complaints.Complaints')
 def notificar_mudanca_status(sender, instance, **kwargs):
     from .models import Complaints
