@@ -63,12 +63,14 @@ class ComplaintsAdmin(admin.ModelAdmin):
     def status_badge(self, obj):
         map_status = {'OPEN': ('warning', 'Aberto'), 'IN_PROGRESS': ('primary', 'Atendimento'), 'RESOLVED': ('success', 'Resolvido')}
         color, label = map_status.get(obj.status, ('secondary', obj.status))
-        return format_html('<span class="badge badge-{}">{}</span>', color, label)
+        return format_html('<span class="badge badge-{}" style="color: #2d3436 !important;">{}</span>', color, label)
+    status_badge.short_description = 'Status'
 
     def priority_badge(self, obj):
         map_prio = {'HIGH': ('danger', 'Alta'), 'MEDIUM': ('warning', 'Média'), 'LOW': ('info', 'Baixa')}
         color, label = map_prio.get(obj.priority, ('secondary', 'N/A'))
-        return format_html('<span class="badge badge-{}">{}</span>', color, label)
+        return format_html('<span class="badge badge-{}" style="color: #2d3436 !important;">{}</span>', color, label)
+    priority_badge.short_description = 'Prioridade'
 
     def photo_view(self, obj):
         if obj.photo: return format_html('<img src="{}" style="max-height: 300px; border-radius: 8px;"/>', obj.photo.url)

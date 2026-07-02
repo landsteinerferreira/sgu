@@ -29,6 +29,82 @@
         outline: none;
     }
 
+    .filter-select {
+        padding: 14px 16px;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        background: white;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #555;
+        cursor: pointer;
+        outline: none;
+        min-width: 180px;
+    }
+
+    .filter-select:focus {
+        border-color: #2798c5;
+    }
+
+    /* 5. PAGINAÇÃO */
+    .pagination-wrapper {
+        display: flex;
+        justify-content: center;
+        padding: 30px 0 50px;
+    }
+
+    .pagination {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .page-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 40px;
+        height: 40px;
+        padding: 0 12px;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        background: white;
+        color: #555;
+        font-weight: 700;
+        font-size: 0.9rem;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+
+    .page-link:hover {
+        border-color: #2798c5;
+        color: #2798c5;
+    }
+
+    .page-link.active {
+        background: #2798c5;
+        border-color: #2798c5;
+        color: white;
+    }
+
+    @media (max-width: 600px) {
+        .search-form {
+            flex-direction: column;
+            gap: 8px;
+        }
+        .filter-select {
+            width: 100%;
+            min-width: unset;
+        }
+        .search-form input[type="text"] {
+            width: 100%;
+        }
+        .btn-search {
+            width: 100%;
+        }
+    }
+
     .btn-search {
         background-color: #2798c5;
         color: white;
@@ -150,6 +226,12 @@
 
 <section class="search-section">
     <form method="GET" action="{% url 'complaints_list' %}" class="search-form">
+        <select name="category" class="filter-select">
+            <option value="">Todas as Categorias</option>
+            {% for cat in categories %}
+            <option value="{{ cat.id }}" {% if current_category == cat.id|stringformat:'s' %}selected{% endif %}>{{ cat.name }}</option>
+            {% endfor %}
+        </select>
         <input type="text" name="search" placeholder="O que você está procurando?" value="{{ request.GET.search }}">
         <button type="submit" class="btn-search">Buscar</button>
     </form>
@@ -209,4 +291,24 @@
         </div>
     {% endif %}
 </div>
+
+{% if is_paginated %}
+<div class="pagination-wrapper">
+    <div class="pagination">
+        {% if page_obj.has_previous %}
+        <a href="?page=1{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}" class="page-link">&laquo;</a>
+        <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}" class="page-link">&lsaquo;</a>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+        <a href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}" class="page-link {% if page_obj.number == num %}active{% endif %}">{{ num }}</a>
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}" class="page-link">&rsaquo;</a>
+        <a href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}" class="page-link">&raquo;</a>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
 {% endblock %}

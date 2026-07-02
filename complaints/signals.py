@@ -1,9 +1,12 @@
 import os
+import json
 from django.db.models.signals import pre_save, post_delete
 from django.dispatch import receiver
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
+from django.conf import settings
+from pywebpush import webpush, WebPushException
 
 # --- FUNÇÃO DE E-MAIL  ---
 def enviar_email_status(instance):
@@ -15,7 +18,7 @@ def enviar_email_status(instance):
             'status': instance.get_status_display(),
             'link': f'https://solicitacidadao.duckdns.org/complaints/{instance.pk}/'
         }
-        html_message = render_to_string('email/status_update.html', context)
+        html_message = render_to_string('complaints/email/status_update.html', context)
         plain_message = strip_tags(html_message)
 
         send_mail(
@@ -30,6 +33,48 @@ def enviar_email_status(instance):
     except Exception as e:
         print(f"ERRO AO ENVIAR E-MAIL: {e}")
 
+# --- FUNÇÃO DE PUSH  ---
+def enviar_push_status(instance):
+    try:
+        from .models import PushSubscription
+        subscriptions = PushSubscription.objects.filter(user=instance.user)
+        if not subscriptions.exists():
+            return
+
+        payload = json.dumps({
+            'title': 'Solicita Cidadão',
+            'body': f'Sua solicitação "{instance.title}" agora está: {instance.get_status_display()}',
+            'url': f'https://solicitacidadao.duckdns.org/complaints/{instance.pk}/'
+        })
+
+        for sub in subscriptions:
+            try:
+                webpush(
+                    subscription_info={
+                        'endpoint': sub.endpoint,
+                        'keys': {
+                            'auth': sub.auth_key,
+                            'p256dh': sub.p256dh_key,
+                        }
+                    },
+                    data=payload,
+                    vapid_private_key=settings.VAPID_PRIVATE_KEY,
+                    vapid_claims={
+                        'sub': settings.VAPID_CLAIMS_SUBJECT
+                    }
+                )
+                print(f"SUCESSO: Push enviado para {instance.user.username}")
+            except WebPushException as e:
+                if hasattr(e, 'response') and e.response.status_code in [410, 404]:
+                    sub.delete()
+                    print(f"LIMPEZA: Inscrição push removida (expirada) para {instance.user.username}")
+                else:
+                    print(f"ERRO PUSH: {e}")
+            except Exception as e:
+                print(f"ERRO PUSH: {e}")
+    except Exception as e:
+        print(f"ERRO PUSH GERAL: {e}")
+
 # --- SINAL: NOTIFICAÇÃO DE STATUS ---
 @receiver(pre_save, sender='complaints.Complaints')
 def notificar_mudanca_status(sender, instance, **kwargs):
@@ -39,6 +84,7 @@ def notificar_mudanca_status(sender, instance, **kwargs):
             obj_antigo = Complaints.objects.get(pk=instance.pk)
             if obj_antigo.status != instance.status:
                 enviar_email_status(instance)
+                enviar_push_status(instance)
         except Complaints.DoesNotExist:
             pass
 

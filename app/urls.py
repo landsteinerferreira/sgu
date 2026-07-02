@@ -1,12 +1,15 @@
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, reverse_lazy
 from django.conf import settings
 from django.conf.urls.static import static
+from django.contrib.auth import views as auth_views
 from accounts.views import register_view, login_view, logout_view
 from complaints.views import (
     ComplaintsListView, ComplaintsDetailView, NewComplaintsCreateView, 
     ComplaintsUpdateView, ComplaintsDeleteView, MyComplaintsListView, 
-    DashboardView, SuggestionView, vote_suggestion, HomeView, AdminDashboardStatsView
+    DashboardView, SuggestionView, vote_suggestion, HomeView, 
+    AdminDashboardStatsView, LiveFeedJsonView, ExportComplaintsCSVView,
+    subscribe_push, unsubscribe_push
 )
 
 urlpatterns = [
@@ -16,6 +19,7 @@ urlpatterns = [
     # 2. ADMIN E DASHBOARD CUSTOMIZADA
     # Colocamos a dashboard ANTES do admin padrão para garantir a precedência da rota
     path('admin/dashboard-stats/', AdminDashboardStatsView.as_view(), name='admin_dashboard_stats'),
+    path('admin/dashboard-stats/exportar-csv/', ExportComplaintsCSVView.as_view(), name='export_complaints_csv'),
     path('admin/', admin.site.urls),
 
     # 3. PÁGINA INICIAL (HOME)
@@ -25,8 +29,32 @@ urlpatterns = [
     path('accounts/register/', register_view, name='register'),
     path('accounts/login/', login_view, name='login'),
     path('logout/', logout_view, name='logout'),
+    path('accounts/password-reset/', auth_views.PasswordResetView.as_view(
+        template_name='accounts/password_reset.html',
+        email_template_name='accounts/password_reset_email.txt',
+        html_email_template_name='accounts/password_reset_email.html',
+        subject_template_name='accounts/password_reset_subject.txt',
+        success_url=reverse_lazy('password_reset_done'),
+    ), name='password_reset'),
+    path('accounts/password-reset/done/', auth_views.PasswordResetDoneView.as_view(
+        template_name='accounts/password_reset_done.html',
+    ), name='password_reset_done'),
+    path('accounts/reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(
+        template_name='accounts/password_reset_confirm.html',
+        success_url=reverse_lazy('password_reset_complete'),
+    ), name='password_reset_confirm'),
+    path('accounts/reset/done/', auth_views.PasswordResetCompleteView.as_view(
+        template_name='accounts/password_reset_complete.html',
+    ), name='password_reset_complete'),
 
-    # 5. SOLICITAÇÕES (COMPLAINTS)
+    # 5. API TEMPO REAL
+    path('live-feed/', LiveFeedJsonView.as_view(), name='live_feed'),
+
+    # 6. API NOTIFICAÇÕES PUSH
+    path('push/subscribe/', subscribe_push, name='subscribe_push'),
+    path('push/unsubscribe/', unsubscribe_push, name='unsubscribe_push'),
+
+    # 7. SOLICITAÇÕES (COMPLAINTS)
     path('complaints/', ComplaintsListView.as_view(), name='complaints_list'),
     path('my_complaints/', MyComplaintsListView.as_view(), name='my_complaints'),
     path('new_complaints/', NewComplaintsCreateView.as_view(), name='new_complaints'),
@@ -34,14 +62,14 @@ urlpatterns = [
     path('complaints/<int:pk>/update/', ComplaintsUpdateView.as_view(), name='complaints_update'),
     path('complaints/<int:pk>/delete/', ComplaintsDeleteView.as_view(), name='complaints_delete'),
     
-    # 6. DASHBOARD DO USUÁRIO E SUGESTÕES
+    # 8. DASHBOARD DO USUÁRIO E SUGESTÕES
     path('dashboard/', DashboardView.as_view(), name='dashboard'),
     path('sugestoes/', SuggestionView.as_view(), name='suggestions'),
     path('sugestoes/votar/<int:pk>/', vote_suggestion, name='vote_suggestion'),
 
 ]
 
-# 7. ARQUIVOS DE MÍDIA E ESTÁTICOS
+# 9. ARQUIVOS DE MÍDIA E ESTÁTICOS
 # Adicionando de forma robusta para desenvolvimento e produção
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

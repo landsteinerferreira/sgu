@@ -52,13 +52,14 @@ ROOT_URLCONF = 'app.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'app' / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'complaints.context_processors.vapid_key',
             ],
         },
     },
@@ -278,3 +279,8 @@ PWA_APP_ICONS = [
 PWA_APP_ICONS_APPLE = PWA_APP_ICONS
 PWA_APP_DIR = 'ltr'
 PWA_APP_LANG = 'pt-BR'
+
+# Configurações de Web Push (VAPID)
+VAPID_PUBLIC_KEY = os.getenv('VAPID_PUBLIC_KEY')
+VAPID_PRIVATE_KEY = os.getenv('VAPID_PRIVATE_KEY')
+VAPID_CLAIMS_SUBJECT = 'mailto:admin@solicitacidadao.duckdns.org'

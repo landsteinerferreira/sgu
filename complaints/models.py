@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.urls import reverse
+from django.conf import settings
 from location_field.models.plain import PlainLocationField
 
 
@@ -156,17 +158,28 @@ class Complaints(models.Model):
     def __str__(self):
         return self.title
 
+    def get_absolute_url(self):
+        return reverse('complaints_detail', kwargs={'pk': self.pk})
+
     class Meta:
         verbose_name = 'Solicitação'
         verbose_name_plural = 'Solicitações'
 
 
-class ComplaintsInventory(models.Model):
-    complaints_count = models.IntegerField()
+#  Notificações Push
+class PushSubscription(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='push_subscriptions')
+    endpoint = models.URLField(max_length=500)
+    auth_key = models.CharField(max_length=100)
+    p256dh_key = models.CharField(max_length=100)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f'Solicitações {self.complaints_count}'
+        return f'Push: {self.user.username}'
+
+    class Meta:
+        verbose_name = 'Inscrição Push'
+        verbose_name_plural = 'Inscrições Push'
 
 
 #  Sugestões
@@ -185,7 +198,5 @@ class Suggestion(models.Model):
 
     class Meta:
         ordering = ['-created_at']
-
-    class Meta:
         verbose_name = 'Sugestão'
         verbose_name_plural = 'Sugestões'
