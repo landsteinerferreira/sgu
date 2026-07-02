@@ -122,8 +122,9 @@ O sistema utiliza uWSGI + WhiteNoise para produção. Consulte `sgu_uwsgi.ini` p
 
 ## Licença
 
-Projeto desenvolvido para a disciplina de Engenharia de Software — USP.
+Projeto desenvolvido para obtenção de título de Especialista em Engenharia de Software — USP.
 
 ## Contato
 
 Landsteiner Ferreira
+Linkedin: https://br.linkedin.com/in/landsteiner-ferreira-da-silva-6ba49953
