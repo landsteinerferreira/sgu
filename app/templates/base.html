@@ -187,7 +187,12 @@
                     <li class="user-info-box">
                         <i class="bi bi-person-circle"></i> {{ user.get_full_name|default:user.username }}
                     </li>
-                    <li><a href="{% url 'logout' %}" style="color: var(--danger);">Sair</a></li>
+                    <li>
+                        <form method="post" action="{% url 'logout' %}" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" style="background: none; border: none; color: var(--danger); font-family: 'Open Sans', sans-serif; font-size: 0.9rem; font-weight: 600; padding: 0.6rem 0.8rem; cursor: pointer;">Sair</button>
+                        </form>
+                    </li>
                 
                 {% else %}
                     <li><a href="{% url 'complaints_list' %}" class="{% if request.resolver_match.url_name == 'complaints_list' %}active{% endif %}">Ver Feed</a></li>
