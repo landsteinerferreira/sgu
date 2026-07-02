@@ -9,6 +9,7 @@ from django.utils.decorators import method_decorator
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import redirect, get_object_or_404
+from django.views import View
 from django.views.generic import (
     TemplateView, ListView, CreateView, UpdateView, DetailView, DeleteView
 )
@@ -169,17 +170,17 @@ class SuggestionView(LoginRequiredMixin, CreateView):
     def get_success_url(self):
         return self.request.GET.get('order', '') and reverse_lazy('suggestions') + f'?order={self.request.GET.get("order")}' or reverse_lazy('suggestions')
 
-@login_required
-def vote_suggestion(request, pk):
-    suggestion = get_object_or_404(Suggestion, pk=pk)
-    if suggestion.votes.filter(id=request.user.id).exists():
-        suggestion.votes.remove(request.user)
-    else:
-        suggestion.votes.add(request.user)
-    order = request.GET.get('order', '')
-    if order:
-        return redirect(f'{reverse_lazy("suggestions")}?order={order}')
-    return redirect('suggestions')
+class VoteSuggestionView(LoginRequiredMixin, View):
+    def get(self, request, pk):
+        suggestion = get_object_or_404(Suggestion, pk=pk)
+        if suggestion.votes.filter(id=request.user.id).exists():
+            suggestion.votes.remove(request.user)
+        else:
+            suggestion.votes.add(request.user)
+        order = request.GET.get('order', '')
+        if order:
+            return redirect(f'{reverse_lazy("suggestions")}?order={order}')
+        return redirect('suggestions')
 
 # --- PÁGINAS PÚBLICAS / ADMIN ---
 
@@ -270,13 +271,12 @@ class AdminDashboardStatsView(LoginRequiredMixin, UserPassesTestMixin, TemplateV
         return context
 
 
-@login_required
-@csrf_exempt
-def subscribe_push(request):
-    if request.method == 'POST':
+@method_decorator([login_required, csrf_exempt], name='dispatch')
+class SubscribePushView(View):
+    def post(self, request):
         try:
             data = json.loads(request.body)
-            sub, created = PushSubscription.objects.update_or_create(
+            PushSubscription.objects.update_or_create(
                 user=request.user,
                 endpoint=data.get('endpoint'),
                 defaults={
@@ -287,13 +287,11 @@ def subscribe_push(request):
             return JsonResponse({'status': 'ok'})
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
-    return JsonResponse({'status': 'error'}, status=405)
 
 
-@login_required
-@csrf_exempt
-def unsubscribe_push(request):
-    if request.method == 'POST':
+@method_decorator([login_required, csrf_exempt], name='dispatch')
+class UnsubscribePushView(View):
+    def post(self, request):
         try:
             data = json.loads(request.body)
             PushSubscription.objects.filter(
@@ -303,7 +301,6 @@ def unsubscribe_push(request):
             return JsonResponse({'status': 'ok'})
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
-    return JsonResponse({'status': 'error'}, status=405)
 
 
 class ExportComplaintsCSVView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):

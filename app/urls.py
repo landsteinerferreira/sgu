@@ -3,13 +3,13 @@ from django.urls import path, include, reverse_lazy
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
-from accounts.views import register_view, login_view, logout_view
+from accounts.views import RegisterView, UserLoginView, UserLogoutView
 from complaints.views import (
     ComplaintsListView, ComplaintsDetailView, NewComplaintsCreateView, 
     ComplaintsUpdateView, ComplaintsDeleteView, MyComplaintsListView, 
-    DashboardView, SuggestionView, vote_suggestion, HomeView, 
+    DashboardView, SuggestionView, VoteSuggestionView, HomeView, 
     AdminDashboardStatsView, LiveFeedJsonView, ExportComplaintsCSVView,
-    subscribe_push, unsubscribe_push
+    SubscribePushView, UnsubscribePushView
 )
 
 urlpatterns = [
@@ -26,9 +26,9 @@ urlpatterns = [
     path('', HomeView.as_view(), name='home'),
 
     # 4. CONTAS / AUTENTICAÇÃO
-    path('accounts/register/', register_view, name='register'),
-    path('accounts/login/', login_view, name='login'),
-    path('logout/', logout_view, name='logout'),
+    path('accounts/register/', RegisterView.as_view(), name='register'),
+    path('accounts/login/', UserLoginView.as_view(), name='login'),
+    path('logout/', UserLogoutView.as_view(), name='logout'),
     path('accounts/password-reset/', auth_views.PasswordResetView.as_view(
         template_name='accounts/password_reset.html',
         email_template_name='accounts/password_reset_email.txt',
@@ -51,8 +51,8 @@ urlpatterns = [
     path('live-feed/', LiveFeedJsonView.as_view(), name='live_feed'),
 
     # 6. API NOTIFICAÇÕES PUSH
-    path('push/subscribe/', subscribe_push, name='subscribe_push'),
-    path('push/unsubscribe/', unsubscribe_push, name='unsubscribe_push'),
+    path('push/subscribe/', SubscribePushView.as_view(), name='subscribe_push'),
+    path('push/unsubscribe/', UnsubscribePushView.as_view(), name='unsubscribe_push'),
 
     # 7. SOLICITAÇÕES (COMPLAINTS)
     path('complaints/', ComplaintsListView.as_view(), name='complaints_list'),
@@ -65,7 +65,7 @@ urlpatterns = [
     # 8. DASHBOARD DO USUÁRIO E SUGESTÕES
     path('dashboard/', DashboardView.as_view(), name='dashboard'),
     path('sugestoes/', SuggestionView.as_view(), name='suggestions'),
-    path('sugestoes/votar/<int:pk>/', vote_suggestion, name='vote_suggestion'),
+    path('sugestoes/votar/<int:pk>/', VoteSuggestionView.as_view(), name='vote_suggestion'),
 
 ]
 

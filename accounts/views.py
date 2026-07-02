@@ -1,8 +1,9 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
-from django.contrib.auth import authenticate, login, logout
-from django.shortcuts import render, redirect
+from django.contrib.auth.views import LoginView as AuthLoginView, LogoutView as AuthLogoutView
+from django.urls import reverse_lazy
+from django.views.generic import CreateView
 from .models import Profile
 
 # --- FORMULÁRIO PERSONALIZADO DE REGISTRO ---
@@ -42,39 +43,25 @@ class RegisterForm(UserCreationForm):
         return user
 
 
-# --- VIEWS ---
+# --- VIEWS (Class-Based) ---
 
-def register_view(request):
-    if request.method == "POST":
-        user_form = RegisterForm(request.POST)
-        if user_form.is_valid():
-            user_form.save()
-            return redirect('login')
-    else:
-        user_form = RegisterForm()
-
-    return render(request, 'accounts/register.html', {'user_form': user_form})
+class RegisterView(CreateView):
+    form_class = RegisterForm
+    template_name = 'accounts/register.html'
+    success_url = reverse_lazy('login')
+    context_object_name = 'user_form'
 
 
-def login_view(request):
-    if request.method == "POST":
-        login_form = AuthenticationForm(request, data=request.POST)
+class UserLoginView(AuthLoginView):
+    template_name = 'accounts/login.html'
+    authentication_form = AuthenticationForm
+    next_page = reverse_lazy('complaints_list')
 
-        if login_form.is_valid():
-            username = login_form.cleaned_data.get('username')
-            password = login_form.cleaned_data.get('password')
-
-            user = authenticate(request, username=username, password=password)
-
-            if user is not None:
-                login(request, user)
-                return redirect('complaints_list')
-    else:
-        login_form = AuthenticationForm()
-
-    return render(request, 'accounts/login.html', {'login_form': login_form})
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['login_form'] = self.get_form()
+        return context
 
 
-def logout_view(request):
-    logout(request)
-    return redirect('home')
+class UserLogoutView(AuthLogoutView):
+    next_page = reverse_lazy('home')
