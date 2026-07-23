@@ -2,16 +2,14 @@
 
 {% block content %}
 <style>
-    /* 1. Container de Centralização */
     .login-wrapper {
         display: flex;
         justify-content: center;
         align-items: center;
-        min-height: calc(100vh - 250px); /* Ajuste baseado no seu header/footer */
+        min-height: calc(100vh - 250px);
         padding: 20px;
     }
 
-    /* 2. Div Personalizada (Card) */
     .login-card {
         background: #ffffff;
         width: 100%;
@@ -32,52 +30,68 @@
         letter-spacing: 1px;
     }
 
-    /* 3. Estilização da Tabela do Django (as_table) */
-    .login-card table {
-        width: 100%;
-        border-collapse: collapse;
+    .field-group {
+        margin-bottom: 20px;
     }
 
-    /* Força cada linha da tabela a se comportar como um bloco (Responsividade) */
-    .login-card tr {
-        display: flex;
-        flex-direction: column;
-        margin-bottom: 15px;
-    }
-
-    .login-card th {
+    .field-group label {
+        display: block;
         text-align: left;
         font-size: 0.9rem;
         margin-bottom: 5px;
         color: #555;
+        font-weight: 600;
     }
 
-    /* Estiliza os inputs que o Django coloca dentro do td */
-    .login-card td input {
+    .input-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .input-wrapper input {
         width: 100%;
         padding: 12px;
+        padding-right: 45px;
         border: 1.5px solid #ddd;
         border-radius: 8px;
         font-size: 1rem;
         transition: border-color 0.3s, box-shadow 0.3s;
+        box-sizing: border-box;
     }
 
-    .login-card td input:focus {
+    .input-wrapper input:focus {
         outline: none;
         border-color: #0096c7;
         box-shadow: 0 0 0 3px rgba(0, 150, 199, 0.1);
     }
 
-    /* Remove os erros padrão da lista para ficarem limpos */
+    .toggle-password {
+        position: absolute;
+        right: 12px;
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 1.2rem;
+        color: #888;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        transition: color 0.2s;
+    }
+
+    .toggle-password:hover {
+        color: #0096c7;
+    }
+
     .errorlist {
         color: #e63946;
         list-style: none;
         padding: 0;
         font-size: 0.8rem;
-        margin-bottom: 5px;
+        margin: 5px 0 0 0;
     }
 
-    /* 4. Botão de Entrada */
     .btn-login {
         width: 100%;
         background-color: #0096c7;
@@ -104,9 +118,32 @@
         <form method="post">
             {% csrf_token %}
 
-            <table>
-                {{ login_form.as_table }}
-            </table>
+            {% if login_form.non_field_errors %}
+                <div class="errorlist">{{ login_form.non_field_errors }}</div>
+            {% endif %}
+
+            <div class="field-group">
+                <label for="{{ login_form.username.id_for_label }}">{{ login_form.username.label }}</label>
+                <div class="input-wrapper">
+                    {{ login_form.username }}
+                </div>
+                {% if login_form.username.errors %}
+                    <ul class="errorlist">{{ login_form.username.errors }}</ul>
+                {% endif %}
+            </div>
+
+            <div class="field-group">
+                <label for="{{ login_form.password.id_for_label }}">{{ login_form.password.label }}</label>
+                <div class="input-wrapper">
+                    {{ login_form.password }}
+                    <button type="button" class="toggle-password" onclick="togglePassword()" aria-label="Mostrar senha">
+                        <i class="bi bi-eye" id="eye-icon"></i>
+                    </button>
+                </div>
+                {% if login_form.password.errors %}
+                    <ul class="errorlist">{{ login_form.password.errors }}</ul>
+                {% endif %}
+            </div>
 
             <input type="submit" value="Entrar" class="btn-login">
             
@@ -118,4 +155,18 @@
         </form>
     </div>
 </div>
+
+<script>
+function togglePassword() {
+    var input = document.getElementById('{{ login_form.password.id_for_label }}');
+    var icon = document.getElementById('eye-icon');
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.className = 'bi bi-eye-slash';
+    } else {
+        input.type = 'password';
+        icon.className = 'bi bi-eye';
+    }
+}
+</script>
 {% endblock %}

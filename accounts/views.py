@@ -56,9 +56,30 @@ class RegisterView(CreateView):
         return context
 
 
+class EmailOrUsernameLoginForm(AuthenticationForm):
+    username = forms.CharField(
+        label="Usuário ou E-mail",
+        widget=forms.TextInput(attrs={'placeholder': 'Usuário ou e-mail', 'class': 'form-control'})
+    )
+    password = forms.CharField(
+        label="Senha",
+        widget=forms.PasswordInput(attrs={'placeholder': 'Digite sua senha', 'class': 'form-control'})
+    )
+
+    def clean_username(self):
+        value = self.cleaned_data['username']
+        if '@' in value:
+            try:
+                user = User.objects.get(email=value)
+                return user.username
+            except User.DoesNotExist:
+                raise forms.ValidationError("E-mail não encontrado.")
+        return value
+
+
 class UserLoginView(AuthLoginView):
     template_name = 'accounts/login.html'
-    authentication_form = AuthenticationForm
+    authentication_form = EmailOrUsernameLoginForm
     next_page = reverse_lazy('complaints_list')
 
     def get_context_data(self, **kwargs):
